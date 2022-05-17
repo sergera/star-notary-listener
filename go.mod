@@ -1,4 +1,4 @@
-module github.com/sergera/star-notary-backend
+module github.com/sergera/star-notary-listener
 
 go 1.18
 
