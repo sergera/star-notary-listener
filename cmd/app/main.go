@@ -203,3 +203,16 @@ func removeFast[T any](slice []T, i int) []T {
 func remove[T any](slice []T, i int) []T {
 	return append(slice[:i], slice[i+1:]...)
 }
+
+// type Event struct {
+// 	contractHash   string
+// 	eventSignature string
+// 	topics         []string
+// 	data           []string
+// 	blockNumber    int
+// 	txHash         string
+// 	txIndex        int
+// 	blockHash      string
+// 	logIndex       int
+// 	removed        bool
+// }

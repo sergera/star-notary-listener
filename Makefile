@@ -26,7 +26,7 @@ help: ## Print this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
 start: ## Start the application with go run
-	INFURA_PROJECT_ID=$(INFURA_PROJECT_ID) CONFIRMATIONS_THRESHOLD=$(CONFIRMATIONS_THRESHOLD) go run main.go
+	INFURA_PROJECT_ID=$(INFURA_PROJECT_ID) CONFIRMATIONS_THRESHOLD=$(CONFIRMATIONS_THRESHOLD) go run cmd/app/main.go
 
 install-eth-tools: ## Run go-ethereum make files to install abigen
 	go get github.com/ethereum/go-ethereum && cd $(GO_PATH)/pkg/mod/github.com/ethereum/go-ethereum* && sudo -E env "PATH=$$PATH" make && sudo -E env "PATH=$$PATH" make devtools
