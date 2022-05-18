@@ -13,6 +13,7 @@ GO_PATH=~/go
 GO_ROOT=/usr/local/go
 
 CONTRACT_NAME=StarNotary
+CONTRACT_ADDRESS=0xf130D6968587fb69DE2DC1249293860446fB3823
 SOLIDITY_VERSION=0.8.11
 DEPLOYED_NETWORK=rinkeby
 CONTRACT_PACKAGE_NAME=$(shell echo "$(CONTRACT_NAME)" | tr 'A-Z' 'a-z')
@@ -26,7 +27,7 @@ help: ## Print this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
 start: ## Start the application with go run
-	INFURA_PROJECT_ID=$(INFURA_PROJECT_ID) CONFIRMATIONS_THRESHOLD=$(CONFIRMATIONS_THRESHOLD) go run cmd/app/main.go
+	CONTRACT_ADDRESS=$(CONTRACT_ADDRESS) INFURA_PROJECT_ID=$(INFURA_PROJECT_ID) CONFIRMATIONS_THRESHOLD=$(CONFIRMATIONS_THRESHOLD) go run cmd/app/main.go
 
 install-eth-tools: ## Run go-ethereum make files to install abigen
 	go get github.com/ethereum/go-ethereum && cd $(GO_PATH)/pkg/mod/github.com/ethereum/go-ethereum* && sudo -E env "PATH=$$PATH" make && sudo -E env "PATH=$$PATH" make devtools

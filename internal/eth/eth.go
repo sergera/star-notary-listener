@@ -27,7 +27,7 @@ func setClient() {
 }
 
 func setContract() {
-	contractAddress := common.HexToAddress("0xf130D6968587fb69DE2DC1249293860446fB3823")
+	contractAddress := common.HexToAddress(env.ContractAddress)
 	starNotary, err := starnotary.NewStarnotary(contractAddress, Client)
 	if err != nil {
 		log.Fatal(err)

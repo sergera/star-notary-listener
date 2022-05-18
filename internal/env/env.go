@@ -7,10 +7,12 @@ import (
 )
 
 var InfuraProjectID string
+var ContractAddress string
 var ConfirmationsThreshold uint64
 
 func Init() {
 	setInfuraProjectID()
+	setContractAddress()
 	setConfirmationsThreshold()
 }
 
@@ -21,6 +23,15 @@ func setInfuraProjectID() {
 	}
 
 	InfuraProjectID = infuraProjectId
+}
+
+func setContractAddress() {
+	contractAddress, exists := os.LookupEnv("CONTRACT_ADDRESS")
+	if !exists {
+		log.Fatal("Contract address environment variable not found")
+	}
+
+	ContractAddress = contractAddress
 }
 
 func setConfirmationsThreshold() {
