@@ -70,10 +70,10 @@ func Listen() {
 	}
 }
 
-func scrapAndConsume(block uint64) {
+func scrapAndConsume(currentBlock uint64) {
 	query := ethereum.FilterQuery{
 		FromBlock: big.NewInt(int64(subscribedEventsList[0].BlockNumber)),
-		ToBlock:   big.NewInt(int64(block)),
+		ToBlock:   big.NewInt(int64(currentBlock)),
 		Addresses: []common.Address{
 			common.HexToAddress(env.ContractAddress),
 		},
@@ -94,7 +94,7 @@ func scrapAndConsume(block uint64) {
 			removeDuplicateEvents(event)
 			continue
 		}
-		if block-event.BlockNumber < env.ConfirmedThreshold {
+		if currentBlock-event.BlockNumber < env.ConfirmedThreshold {
 			continue
 		}
 		consume(event)
