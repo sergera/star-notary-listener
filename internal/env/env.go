@@ -8,12 +8,14 @@ import (
 
 var InfuraProjectID string
 var ContractAddress string
-var ConfirmationsThreshold uint64
+var ConfirmedThreshold uint64
+var OrphanThreshold uint64
 
 func Init() {
 	setInfuraProjectID()
 	setContractAddress()
-	setConfirmationsThreshold()
+	setConfirmedThreshold()
+	setOrphanThreshold()
 }
 
 func setInfuraProjectID() {
@@ -34,16 +36,30 @@ func setContractAddress() {
 	ContractAddress = contractAddress
 }
 
-func setConfirmationsThreshold() {
-	confirmationsThresholdString, exists := os.LookupEnv("CONFIRMATIONS_THRESHOLD")
+func setConfirmedThreshold() {
+	confirmedThresholdString, exists := os.LookupEnv("CONFIRMED_THRESHOLD")
 	if !exists {
-		log.Fatal("Confirmations threshold environment variable not found")
+		log.Fatal("Confirmed threshold environment variable not found")
 	}
 
-	confirmationsThreshold, err := strconv.ParseUint(confirmationsThresholdString, 10, 64)
+	confirmedThreshold, err := strconv.ParseUint(confirmedThresholdString, 10, 64)
 	if err != nil {
-		log.Fatal("Could not convert onfirmations threshold environment variable to int")
+		log.Fatal("Could not convert confirmed threshold environment variable to uint")
 	}
 
-	ConfirmationsThreshold = confirmationsThreshold
+	ConfirmedThreshold = confirmedThreshold
+}
+
+func setOrphanThreshold() {
+	orphanThresholdString, exists := os.LookupEnv("ORPHAN_THRESHOLD")
+	if !exists {
+		log.Fatal("Orphan threshold environment variable not found")
+	}
+
+	orphanThrehold, err := strconv.ParseUint(orphanThresholdString, 10, 64)
+	if err != nil {
+		log.Fatal("Could not convert orphan threshold environment variable to uint")
+	}
+
+	OrphanThreshold = orphanThrehold
 }

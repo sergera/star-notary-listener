@@ -94,7 +94,7 @@ func scrapAndConsume(block uint64) {
 			removeDuplicateEvents(event)
 			continue
 		}
-		if block-event.BlockNumber < env.ConfirmationsThreshold {
+		if block-event.BlockNumber < env.ConfirmedThreshold {
 			continue
 		}
 		consume(event)
