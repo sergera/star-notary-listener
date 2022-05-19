@@ -2,7 +2,9 @@ package eth
 
 import (
 	"log"
+	"strings"
 
+	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/sergera/star-notary-listener/internal/env"
@@ -11,10 +13,12 @@ import (
 
 var Client *ethclient.Client
 var Contract *starnotary.Starnotary
+var ABI *abi.ABI
 
 func Init() {
 	setClient()
 	setContract()
+	setABI()
 }
 
 func setClient() {
@@ -34,4 +38,13 @@ func setContract() {
 	}
 
 	Contract = starNotary
+}
+
+func setABI() {
+	starnotaryABI, err := abi.JSON(strings.NewReader(string(starnotary.StarnotaryMetaData.ABI)))
+	if err != nil {
+		log.Fatal("Could not read contract ABI")
+	}
+
+	ABI = &starnotaryABI
 }
