@@ -9,13 +9,13 @@ import (
 var InfuraWebsocketURL string
 var ContractAddress string
 var ConfirmedThreshold uint64
-var OrphanThreshold uint64
+var OrphanedThreshold uint64
 
 func Init() {
 	setInfuraWebsocketURL()
 	setContractAddress()
 	setConfirmedThreshold()
-	setOrphanThreshold()
+	setOrphanedThreshold()
 }
 
 func setInfuraWebsocketURL() {
@@ -50,16 +50,16 @@ func setConfirmedThreshold() {
 	ConfirmedThreshold = confirmedThreshold
 }
 
-func setOrphanThreshold() {
-	orphanThresholdString, exists := os.LookupEnv("ORPHAN_THRESHOLD")
+func setOrphanedThreshold() {
+	orphanedThresholdString, exists := os.LookupEnv("ORPHANED_THRESHOLD")
 	if !exists {
-		log.Fatal("Orphan threshold environment variable not found")
+		log.Fatal("Orphaned threshold environment variable not found")
 	}
 
-	orphanThrehold, err := strconv.ParseUint(orphanThresholdString, 10, 64)
+	orphanedThrehold, err := strconv.ParseUint(orphanedThresholdString, 10, 64)
 	if err != nil {
-		log.Fatal("Could not convert orphan threshold environment variable to uint")
+		log.Fatal("Could not convert orphaned threshold environment variable to uint")
 	}
 
-	OrphanThreshold = orphanThrehold
+	OrphanedThreshold = orphanedThrehold
 }

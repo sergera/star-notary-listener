@@ -33,9 +33,9 @@ func removeDuplicateEvents(event models.Event) {
 
 func removeOrphanedEvents(currentBlock uint64) {
 	subscribedEventsList = slc.Filter(subscribedEventsList, func(event models.Event) bool {
-		if currentBlock-event.BlockNumber >= env.OrphanThreshold {
+		if currentBlock-event.BlockNumber >= env.OrphanedThreshold {
 			fmt.Println("Removing orphan event: ", event)
 		}
-		return currentBlock-event.BlockNumber < env.OrphanThreshold
+		return currentBlock-event.BlockNumber < env.OrphanedThreshold
 	})
 }
