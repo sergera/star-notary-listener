@@ -22,7 +22,7 @@ func Init() {
 }
 
 func setClient() {
-	client, err := ethclient.Dial("wss://rinkeby.infura.io/ws/v3/" + env.InfuraProjectID)
+	client, err := ethclient.Dial(env.InfuraWebsocketURL)
 	if err != nil {
 		log.Fatal(err)
 	}

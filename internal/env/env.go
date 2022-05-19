@@ -6,25 +6,25 @@ import (
 	"strconv"
 )
 
-var InfuraProjectID string
+var InfuraWebsocketURL string
 var ContractAddress string
 var ConfirmedThreshold uint64
 var OrphanThreshold uint64
 
 func Init() {
-	setInfuraProjectID()
+	setInfuraWebsocketURL()
 	setContractAddress()
 	setConfirmedThreshold()
 	setOrphanThreshold()
 }
 
-func setInfuraProjectID() {
-	infuraProjectId, exists := os.LookupEnv("INFURA_PROJECT_ID")
+func setInfuraWebsocketURL() {
+	infuraWebsocketURL, exists := os.LookupEnv("INFURA_WEBSOCKET_URL")
 	if !exists {
-		log.Fatal("Infura project id environment variable not found")
+		log.Fatal("Infura websocket URL environment variable not found")
 	}
 
-	InfuraProjectID = infuraProjectId
+	InfuraWebsocketURL = infuraWebsocketURL
 }
 
 func setContractAddress() {

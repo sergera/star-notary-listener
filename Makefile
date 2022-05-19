@@ -20,7 +20,7 @@ CONTRACT_PACKAGE_NAME=$(shell echo "$(CONTRACT_NAME)" | tr 'A-Z' 'a-z')
 PROJECT_ROOT_PATH:=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 TRUFFLE_PROJECT_ROOT_PATH=~/code/star-notary
 
-INFURA_PROJECT_ID=
+INFURA_WEBSOCKET_URL=
 CONFIRMED_THRESHOLD=12
 ORPHAN_THRESHOLD=24
 
@@ -28,7 +28,7 @@ help: ## Print this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
 start: ## Start the application with go run
-	CONTRACT_ADDRESS=$(CONTRACT_ADDRESS) INFURA_PROJECT_ID=$(INFURA_PROJECT_ID) CONFIRMED_THRESHOLD=$(CONFIRMED_THRESHOLD) ORPHAN_THRESHOLD=$(ORPHAN_THRESHOLD) go run cmd/app/main.go
+	CONTRACT_ADDRESS=$(CONTRACT_ADDRESS) INFURA_WEBSOCKET_URL=$(INFURA_WEBSOCKET_URL) CONFIRMED_THRESHOLD=$(CONFIRMED_THRESHOLD) ORPHAN_THRESHOLD=$(ORPHAN_THRESHOLD) go run cmd/app/main.go
 
 install-eth-tools: ## Run go-ethereum make files to install abigen
 	go get github.com/ethereum/go-ethereum && cd $(GO_PATH)/pkg/mod/github.com/ethereum/go-ethereum* && sudo -E env "PATH=$$PATH" make && sudo -E env "PATH=$$PATH" make devtools
