@@ -59,12 +59,13 @@ func Listen() {
 			insertEvent(soldEvent)
 			fmt.Printf("Sold Event To List: %+v\n", soldEvent)
 		default:
-			currentBlockNumber, err := eth.Client.BlockNumber(context.Background())
-			if err == nil {
-				if len(subscribedEventsList) > 0 {
-					scrapAndConsume(currentBlockNumber)
+			if len(subscribedEventsList) > 0 {
+				currentBlock, err := eth.Client.BlockNumber(context.Background())
+				if err != nil {
+					fmt.Println("Could not update current block number")
 				}
-				removeOrphanedEvents(currentBlockNumber)
+				scrapAndConsume(currentBlock)
+				removeOrphanedEvents(currentBlock)
 			}
 		}
 	}
@@ -73,7 +74,7 @@ func Listen() {
 func scrapAndConsume(currentBlock uint64) {
 	query := ethereum.FilterQuery{
 		FromBlock: big.NewInt(int64(subscribedEventsList[0].BlockNumber)),
-		ToBlock:   big.NewInt(int64(currentBlock)),
+		ToBlock:   nil, /* nil will query to latest block */
 		Addresses: []common.Address{
 			common.HexToAddress(env.ContractAddress),
 		},
