@@ -8,7 +8,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/sergera/star-notary-listener/internal/env"
-	"github.com/sergera/star-notary-listener/internal/starnotary"
+	"github.com/sergera/star-notary-listener/internal/gocontracts/starnotary"
 )
 
 var Client *ethclient.Client

@@ -6,8 +6,8 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/sergera/star-notary-listener/internal/eth"
+	"github.com/sergera/star-notary-listener/internal/gocontracts/starnotary"
 	"github.com/sergera/star-notary-listener/internal/models"
-	"github.com/sergera/star-notary-listener/internal/starnotary"
 )
 
 func eventToCreatedEvent(event models.Event) models.CreatedEvent {

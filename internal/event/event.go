@@ -11,8 +11,8 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/sergera/star-notary-listener/internal/env"
 	"github.com/sergera/star-notary-listener/internal/eth"
+	"github.com/sergera/star-notary-listener/internal/gocontracts/starnotary"
 	"github.com/sergera/star-notary-listener/internal/models"
-	"github.com/sergera/star-notary-listener/internal/starnotary"
 )
 
 var eventSignatureToName = map[string]string{

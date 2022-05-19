@@ -40,6 +40,6 @@ generate-bytecode: ## Compile EVM bytecode using solc docker image and write to 
 	mkdir -p build && mkdir -p build/contracts && mkdir -p build/contracts/$(CONTRACT_PACKAGE_NAME) && mkdir -p build/contracts/$(CONTRACT_PACKAGE_NAME)/bin && sudo docker pull ethereum/solc:$(SOLIDITY_VERSION) && sudo docker run --rm -v $(PROJECT_ROOT_PATH):/root -v $(TRUFFLE_PROJECT_ROOT_PATH):/truffle ethereum/solc:$(SOLIDITY_VERSION) openzeppelin-solidity=/truffle/node_modules/openzeppelin-solidity --bin /truffle/contracts/$(CONTRACT_NAME).sol --overwrite -o /root/build/contracts/$(CONTRACT_PACKAGE_NAME)/bin
 
 generate-go-contract: ## Make Go contract file into /build/contracts/CONTRACT_NAME
-	mkdir -p internal && mkdir -p internal/$(CONTRACT_PACKAGE_NAME) && $(GO_PATH)/bin/abigen -bin=build/contracts/$(CONTRACT_PACKAGE_NAME)/bin/$(CONTRACT_NAME).bin --abi=build/contracts/$(CONTRACT_PACKAGE_NAME)/abi/$(CONTRACT_NAME).abi --pkg=$(CONTRACT_PACKAGE_NAME) --out=internal/$(CONTRACT_PACKAGE_NAME)/$(CONTRACT_PACKAGE_NAME).go
+	mkdir -p internal && mkdir -p internal/$(CONTRACT_PACKAGE_NAME) && $(GO_PATH)/bin/abigen -bin=build/contracts/$(CONTRACT_PACKAGE_NAME)/bin/$(CONTRACT_NAME).bin --abi=build/contracts/$(CONTRACT_PACKAGE_NAME)/abi/$(CONTRACT_NAME).abi --pkg=$(CONTRACT_PACKAGE_NAME) --out=internal/gocontracts/$(CONTRACT_PACKAGE_NAME)/$(CONTRACT_PACKAGE_NAME).go
 
 generate: generate-abi generate-bytecode generate-go-contract ## Generate ABI, EVM bytecode, and Go contract file
