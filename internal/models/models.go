@@ -1,16 +1,26 @@
 package models
 
+import (
+	"github.com/ethereum/go-ethereum/common"
+)
+
 type Event struct {
-	ContractHash   string
-	EventSignature string
-	Topics         []string
-	Data           []string
-	BlockNumber    int
-	TxHash         string
-	TxIndex        int
-	BlockHash      string
-	LogIndex       int
-	Removed        bool
+	ContractHash string
+	EventName    string
+	Topics       []common.Hash
+	Data         []byte
+	BlockNumber  uint64
+	TxHash       string
+	TxIndex      uint
+	BlockHash    string
+	LogIndex     uint
+	Removed      bool
+	/* specific event fields */
+	Coordinates string
+	Sender      string
+	PriceInWei  string
+	TokenId     string
+	Name        string
 }
 
 type CreatedEvent struct {
@@ -18,49 +28,26 @@ type CreatedEvent struct {
 	TokenId     string
 	Coordinates string
 	Name        string
-	BlockNumber uint64
-	EventIndex  uint
 }
 
 type ChangedNameEvent struct {
-	TokenId     string
-	NewName     string
-	BlockNumber uint64
-	EventIndex  uint
+	Owner   string
+	TokenId string
+	NewName string
 }
 
 type PutForSaleEvent struct {
-	TokenId     string
-	PriceInWei  string
-	BlockNumber uint64
-	EventIndex  uint
+	Owner      string
+	TokenId    string
+	PriceInWei string
 }
 
 type RemovedFromSaleEvent struct {
-	TokenId     string
-	BlockNumber uint64
-	EventIndex  uint
+	Owner   string
+	TokenId string
 }
 
-type BoughtEvent struct {
-	NewOwner    string
-	TokenId     string
-	BlockNumber uint64
-	EventIndex  uint
+type SoldEvent struct {
+	NewOwner string
+	TokenId  string
 }
-
-type SharedEventFieldsInterface interface {
-	GetBlockNumber() uint64
-	GetEventIndex() uint
-}
-
-func (e CreatedEvent) GetBlockNumber() uint64         { return e.BlockNumber }
-func (e CreatedEvent) GetEventIndex() uint            { return e.EventIndex }
-func (e ChangedNameEvent) GetBlockNumber() uint64     { return e.BlockNumber }
-func (e ChangedNameEvent) GetEventIndex() uint        { return e.EventIndex }
-func (e PutForSaleEvent) GetBlockNumber() uint64      { return e.BlockNumber }
-func (e PutForSaleEvent) GetEventIndex() uint         { return e.EventIndex }
-func (e RemovedFromSaleEvent) GetBlockNumber() uint64 { return e.BlockNumber }
-func (e RemovedFromSaleEvent) GetEventIndex() uint    { return e.EventIndex }
-func (e BoughtEvent) GetBlockNumber() uint64          { return e.BlockNumber }
-func (e BoughtEvent) GetEventIndex() uint             { return e.EventIndex }

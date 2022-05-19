@@ -9,5 +9,5 @@ import (
 func main() {
 	env.Init()
 	eth.Init()
-	event.ListenAndConfirm()
+	event.Listen()
 }
