@@ -24,7 +24,7 @@ func Init() {
 func setClient() {
 	client, err := ethclient.Dial(env.InfuraWebsocketURL)
 	if err != nil {
-		log.Fatal(err)
+		log.Panicf("Could not dial eth client: %+v\n\n", err)
 	}
 
 	Client = client
@@ -34,7 +34,7 @@ func setContract() {
 	contractAddress := common.HexToAddress(env.ContractAddress)
 	starNotary, err := starnotary.NewStarnotary(contractAddress, Client)
 	if err != nil {
-		log.Fatal(err)
+		log.Panicf("Could not instance go contract: %+v\n\n", err)
 	}
 
 	Contract = starNotary
@@ -43,7 +43,7 @@ func setContract() {
 func setABI() {
 	starnotaryABI, err := abi.JSON(strings.NewReader(string(starnotary.StarnotaryMetaData.ABI)))
 	if err != nil {
-		log.Fatal("Could not read contract ABI")
+		log.Panicf("Could not read contract ABI: %+v\n\n", err)
 	}
 
 	ABI = &starnotaryABI

@@ -21,7 +21,7 @@ func Init() {
 func setInfuraWebsocketURL() {
 	infuraWebsocketURL, exists := os.LookupEnv("INFURA_WEBSOCKET_URL")
 	if !exists {
-		log.Fatal("Infura websocket URL environment variable not found")
+		log.Panic("Infura websocket URL environment variable not found")
 	}
 
 	InfuraWebsocketURL = infuraWebsocketURL
@@ -30,7 +30,7 @@ func setInfuraWebsocketURL() {
 func setContractAddress() {
 	contractAddress, exists := os.LookupEnv("CONTRACT_ADDRESS")
 	if !exists {
-		log.Fatal("Contract address environment variable not found")
+		log.Panic("Contract address environment variable not found")
 	}
 
 	ContractAddress = contractAddress
@@ -39,12 +39,12 @@ func setContractAddress() {
 func setConfirmedThreshold() {
 	confirmedThresholdString, exists := os.LookupEnv("CONFIRMED_THRESHOLD")
 	if !exists {
-		log.Fatal("Confirmed threshold environment variable not found")
+		log.Panic("Confirmed threshold environment variable not found")
 	}
 
 	confirmedThreshold, err := strconv.ParseUint(confirmedThresholdString, 10, 64)
 	if err != nil {
-		log.Fatal("Could not convert confirmed threshold environment variable to uint")
+		log.Panic("Could not convert confirmed threshold environment variable to uint")
 	}
 
 	ConfirmedThreshold = confirmedThreshold
@@ -53,12 +53,12 @@ func setConfirmedThreshold() {
 func setOrphanedThreshold() {
 	orphanedThresholdString, exists := os.LookupEnv("ORPHANED_THRESHOLD")
 	if !exists {
-		log.Fatal("Orphaned threshold environment variable not found")
+		log.Panic("Orphaned threshold environment variable not found")
 	}
 
 	orphanedThrehold, err := strconv.ParseUint(orphanedThresholdString, 10, 64)
 	if err != nil {
-		log.Fatal("Could not convert orphaned threshold environment variable to uint")
+		log.Panic("Could not convert orphaned threshold environment variable to uint")
 	}
 
 	OrphanedThreshold = orphanedThrehold

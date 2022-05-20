@@ -156,7 +156,7 @@ func logToEvent(logEvent types.Log) (event models.Event) {
 	case "Sold":
 		event = logSoldToEvent(logEvent)
 	default:
-		log.Fatal("Tried to parse a non listened event")
+		log.Printf("Tried to parse a non listened event: %+v\n\n", eventName)
 	}
 
 	return
@@ -165,7 +165,7 @@ func logToEvent(logEvent types.Log) (event models.Event) {
 func logCreatedToEvent(logEvent types.Log) models.Event {
 	parsedCreated, err := eth.Contract.ParseCreated(logEvent)
 	if err != nil {
-		log.Fatal("Could not parse log event")
+		log.Printf("Could not parse log event: %+v\n\n", err)
 	}
 	return contractCreatedToEvent(*parsedCreated)
 }
@@ -173,7 +173,7 @@ func logCreatedToEvent(logEvent types.Log) models.Event {
 func logChangedNameToEvent(logEvent types.Log) models.Event {
 	parsedChangedName, err := eth.Contract.ParseChangedName(logEvent)
 	if err != nil {
-		log.Fatal("Could not parse log event")
+		log.Printf("Could not parse log event: %+v\n\n", err)
 	}
 	return contractChangedNameToEvent(*parsedChangedName)
 }
@@ -181,7 +181,7 @@ func logChangedNameToEvent(logEvent types.Log) models.Event {
 func logPutForSaleToEvent(logEvent types.Log) models.Event {
 	parsedPutForSale, err := eth.Contract.ParsePutForSale(logEvent)
 	if err != nil {
-		log.Fatal("Could not parse log event")
+		log.Printf("Could not parse log event: %+v\n\n", err)
 	}
 	return contractPutForSaleToEvent(*parsedPutForSale)
 }
@@ -189,7 +189,7 @@ func logPutForSaleToEvent(logEvent types.Log) models.Event {
 func logRemovedFromSaleToEvent(logEvent types.Log) models.Event {
 	parsedRemovedFromSale, err := eth.Contract.ParseRemovedFromSale(logEvent)
 	if err != nil {
-		log.Fatal("Could not parse log event")
+		log.Printf("Could not parse log event: %+v\n\n", err)
 	}
 	return contractRemovedFromSaleToEvent(*parsedRemovedFromSale)
 }
@@ -197,7 +197,7 @@ func logRemovedFromSaleToEvent(logEvent types.Log) models.Event {
 func logSoldToEvent(logEvent types.Log) models.Event {
 	parsedSold, err := eth.Contract.ParseSold(logEvent)
 	if err != nil {
-		log.Fatal("Could not parse log event")
+		log.Printf("Could not parse log event: %+v\n\n", err)
 	}
 	return contractSoldToEvent(*parsedSold)
 }

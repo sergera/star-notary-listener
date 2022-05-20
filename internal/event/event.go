@@ -2,7 +2,6 @@ package event
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"math/big"
 
@@ -30,6 +29,12 @@ func Listen() {
 	removedFromSaleResChan := make(chan *starnotary.StarnotaryRemovedFromSale)
 	soldResChan := make(chan *starnotary.StarnotarySold)
 
+	defer close(createdResChan)
+	defer close(changedNameResChan)
+	defer close(putForSaleResChan)
+	defer close(removedFromSaleResChan)
+	defer close(soldResChan)
+
 	eth.Contract.WatchCreated(&bind.WatchOpts{Start: nil, Context: context.Background()}, createdResChan)
 	eth.Contract.WatchChangedName(&bind.WatchOpts{Start: nil, Context: context.Background()}, changedNameResChan)
 	eth.Contract.WatchPutForSale(&bind.WatchOpts{Start: nil, Context: context.Background()}, putForSaleResChan)
@@ -41,28 +46,28 @@ func Listen() {
 		case createdLog := <-createdResChan:
 			createdEvent := contractCreatedToEvent(*createdLog)
 			insertEvent(createdEvent)
-			fmt.Printf("Created Event To List: %+v\n", createdEvent)
+			log.Printf("Created Event To List: %+v\n\n", createdEvent)
 		case changedNameLog := <-changedNameResChan:
 			changedNameEvent := contractChangedNameToEvent(*changedNameLog)
 			insertEvent(changedNameEvent)
-			fmt.Printf("Changed Name Event To List: %+v\n", changedNameEvent)
+			log.Printf("Changed Name Event To List: %+v\n\n", changedNameEvent)
 		case putForSaleLog := <-putForSaleResChan:
 			putForSaleEvent := contractPutForSaleToEvent(*putForSaleLog)
 			insertEvent(putForSaleEvent)
-			fmt.Printf("Put For Sale Event To List: %+v\n", putForSaleEvent)
+			log.Printf("Put For Sale Event To List: %+v\n\n", putForSaleEvent)
 		case removedFromSaleLog := <-removedFromSaleResChan:
 			removedFromSaleEvent := contractRemovedFromSaleToEvent(*removedFromSaleLog)
 			insertEvent(removedFromSaleEvent)
-			fmt.Printf("Removed From Sale Event To List: %+v\n", removedFromSaleEvent)
+			log.Printf("Removed From Sale Event To List: %+v\n\n", removedFromSaleEvent)
 		case soldLog := <-soldResChan:
 			soldEvent := contractSoldToEvent(*soldLog)
 			insertEvent(soldEvent)
-			fmt.Printf("Sold Event To List: %+v\n", soldEvent)
+			log.Printf("Sold Event To List: %+v\n\n", soldEvent)
 		default:
 			if len(subscribedEventsList) > 0 {
 				currentBlock, err := eth.Client.BlockNumber(context.Background())
 				if err != nil {
-					fmt.Println("Could not update current block number")
+					log.Printf("Could not update current block number: %+v\n\n", err)
 				}
 				scrapAndConsume(currentBlock)
 				removeOrphanedEvents(currentBlock)
@@ -82,7 +87,7 @@ func scrapAndConsume(currentBlock uint64) {
 
 	logs, err := eth.Client.FilterLogs(context.Background(), query)
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("Could not query contract logs: %+v\n\n", err)
 	}
 
 	for _, vLog := range logs {
@@ -107,18 +112,18 @@ func consume(event models.Event) {
 	switch event.EventName {
 	case "Created":
 		createdModel := eventToCreatedEvent(event)
-		fmt.Printf("Consuming created event: %+v\n\n", createdModel)
+		log.Printf("Consuming created event: %+v\n\n", createdModel)
 	case "ChangedName":
 		changedNameModel := eventToChangedNameEvent(event)
-		fmt.Printf("Consuming changed name event: %+v\n\n", changedNameModel)
+		log.Printf("Consuming changed name event: %+v\n\n", changedNameModel)
 	case "PutForSale":
 		putForSaleModel := eventToPutForSaleEvent(event)
-		fmt.Printf("Consuming put for sale event: %+v\n\n", putForSaleModel)
+		log.Printf("Consuming put for sale event: %+v\n\n", putForSaleModel)
 	case "RemovedFromSale":
 		removedFromSaleModel := eventToRemovedFromSaleEvent(event)
-		fmt.Printf("Consuming removed from sale event: %+v\n\n", removedFromSaleModel)
+		log.Printf("Consuming removed from sale event: %+v\n\n", removedFromSaleModel)
 	case "Sold":
 		soldModel := eventToSoldEvent(event)
-		fmt.Printf("Consuming sold event: %+v\n\n", soldModel)
+		log.Printf("Consuming sold event: %+v\n\n", soldModel)
 	}
 }

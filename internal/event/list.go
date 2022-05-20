@@ -1,7 +1,7 @@
 package event
 
 import (
-	"fmt"
+	"log"
 	"sort"
 
 	"github.com/sergera/star-notary-listener/internal/env"
@@ -25,7 +25,7 @@ func insertEvent(event models.Event) {
 func removeDuplicateEvents(event models.Event) {
 	subscribedEventsList = slc.Filter(subscribedEventsList, func(duplicate models.Event) bool {
 		if isDuplicateEvent(event, duplicate) {
-			fmt.Println("Removing duplicate event: ", event)
+			log.Printf("Removing duplicate event: %+v\n\n", event)
 		}
 		return !isDuplicateEvent(event, duplicate)
 	})
@@ -34,7 +34,7 @@ func removeDuplicateEvents(event models.Event) {
 func removeOrphanedEvents(currentBlock uint64) {
 	subscribedEventsList = slc.Filter(subscribedEventsList, func(event models.Event) bool {
 		if currentBlock-event.BlockNumber >= env.OrphanedThreshold {
-			fmt.Println("Removing orphan event: ", event)
+			log.Printf("Removing orphan event: %+v\n\n", event)
 		}
 		return currentBlock-event.BlockNumber < env.OrphanedThreshold
 	})
