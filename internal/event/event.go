@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"math/big"
+	"time"
 
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -71,6 +72,7 @@ func Listen() {
 				}
 				scrapAndConsume(currentBlock)
 				removeOrphanedEvents(currentBlock)
+				time.Sleep(time.Duration(env.SleepIntervalSeconds) * time.Second)
 			}
 		}
 	}
