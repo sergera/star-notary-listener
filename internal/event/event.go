@@ -93,14 +93,23 @@ func scrapAndConsume(currentBlock uint64) {
 	for _, vLog := range logs {
 		listenedEvent := eventSignatureToName[vLog.Topics[0].Hex()]
 		if len(listenedEvent) == 0 {
+			/* if event is not listened to, ignore it */
 			continue
 		}
 		event := logToEvent(vLog)
 		if event.Removed {
+			/* if event was removed, remove it from list */
 			removeDuplicateEvents(event)
 			continue
 		}
 		if currentBlock-event.BlockNumber < env.ConfirmedThreshold {
+			/* if event is not yet confirmed, ignore it */
+			continue
+		}
+		if !isEventInList(event) {
+			/* if event is not in list, ignore it */
+			/* subscribed events might arrive after being added to logs */
+			/* which would make the event be consumed again upon arrival */
 			continue
 		}
 		consume(event)

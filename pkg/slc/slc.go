@@ -32,11 +32,11 @@ func Map[T any](slc []T, f func(T) T) []T {
 	return mapped
 }
 
-func Find[T any](slc []T, f func(T) bool) (fnd T, isFnd bool) {
+func Find[T any](slc []T, f func(T) bool) (value T, found bool) {
 	for _, e := range slc {
 		if f(e) {
-			fnd = e
-			isFnd = true
+			value = e
+			found = true
 			return
 		}
 	}

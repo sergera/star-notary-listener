@@ -39,3 +39,10 @@ func removeOrphanedEvents(currentBlock uint64) {
 		return currentBlock-event.BlockNumber < env.OrphanedThreshold
 	})
 }
+
+func isEventInList(event models.Event) bool {
+	_, exists := slc.Find(subscribedEventsList, func(duplicate models.Event) bool {
+		return isDuplicateEvent(event, duplicate)
+	})
+	return exists
+}
