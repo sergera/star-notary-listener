@@ -9,7 +9,7 @@ import (
 	"github.com/sergera/star-notary-listener/pkg/slc"
 )
 
-var subscribedEventsList []genericEvent = []genericEvent{}
+var unconfirmedEventsList []genericEvent = []genericEvent{}
 
 type genericEvent struct {
 	contractHash string
@@ -31,18 +31,18 @@ type genericEvent struct {
 }
 
 func sortListByBlockNumber() {
-	sort.SliceStable(subscribedEventsList, func(i, j int) bool {
-		return subscribedEventsList[i].blockNumber < subscribedEventsList[j].blockNumber
+	sort.SliceStable(unconfirmedEventsList, func(i, j int) bool {
+		return unconfirmedEventsList[i].blockNumber < unconfirmedEventsList[j].blockNumber
 	})
 }
 
-func insertEvent(event genericEvent) {
-	subscribedEventsList = append(subscribedEventsList, event)
+func insertEventByBlockNumber(event genericEvent) {
+	unconfirmedEventsList = append(unconfirmedEventsList, event)
 	sortListByBlockNumber()
 }
 
-func removeDuplicateEvents(event genericEvent) {
-	subscribedEventsList = slc.Filter(subscribedEventsList, func(duplicate genericEvent) bool {
+func removeEvents(event genericEvent) {
+	unconfirmedEventsList = slc.Filter(unconfirmedEventsList, func(duplicate genericEvent) bool {
 		if isDuplicateEvent(event, duplicate) {
 			log.Printf("Removing duplicate event: %+v\n\n", event)
 		}
@@ -51,16 +51,16 @@ func removeDuplicateEvents(event genericEvent) {
 }
 
 func removeOrphanedEvents(currentBlock uint64) {
-	subscribedEventsList = slc.Filter(subscribedEventsList, func(event genericEvent) bool {
-		if currentBlock-event.blockNumber >= env.OrphanedThreshold {
-			log.Printf("Removing orphan event: %+v\n\n", event)
+	unconfirmedEventsList = slc.Filter(unconfirmedEventsList, func(orphan genericEvent) bool {
+		if currentBlock-orphan.blockNumber >= env.OrphanedThreshold {
+			log.Printf("Removing orphan event: %+v\n\n", orphan)
 		}
-		return currentBlock-event.blockNumber < env.OrphanedThreshold
+		return currentBlock-orphan.blockNumber < env.OrphanedThreshold
 	})
 }
 
 func isEventInList(event genericEvent) bool {
-	_, exists := slc.Find(subscribedEventsList, func(duplicate genericEvent) bool {
+	_, exists := slc.Find(unconfirmedEventsList, func(duplicate genericEvent) bool {
 		return isDuplicateEvent(event, duplicate)
 	})
 	return exists

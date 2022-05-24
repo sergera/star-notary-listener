@@ -10,7 +10,7 @@ import (
 	"github.com/sergera/star-notary-listener/internal/models"
 )
 
-func eventToCreatedEvent(event genericEvent) models.CreatedEvent {
+func genericToCreatedModel(event genericEvent) models.CreatedEvent {
 	return models.CreatedEvent{
 		Owner:       event.sender,
 		Name:        event.name,
@@ -19,34 +19,34 @@ func eventToCreatedEvent(event genericEvent) models.CreatedEvent {
 	}
 }
 
-func eventToChangedNameEvent(event genericEvent) models.ChangedNameEvent {
+func genericToChangedNameModel(event genericEvent) models.ChangedNameEvent {
 	return models.ChangedNameEvent{
 		NewName: event.name,
 		TokenId: event.tokenId,
 	}
 }
 
-func eventToPutForSaleEvent(event genericEvent) models.PutForSaleEvent {
+func genericToPutForSaleModel(event genericEvent) models.PutForSaleEvent {
 	return models.PutForSaleEvent{
 		TokenId:    event.tokenId,
 		PriceInWei: event.priceInWei,
 	}
 }
 
-func eventToRemovedFromSaleEvent(event genericEvent) models.RemovedFromSaleEvent {
+func genericToRemovedFromSaleModel(event genericEvent) models.RemovedFromSaleEvent {
 	return models.RemovedFromSaleEvent{
 		TokenId: event.tokenId,
 	}
 }
 
-func eventToSoldEvent(event genericEvent) models.SoldEvent {
+func genericToSoldModel(event genericEvent) models.SoldEvent {
 	return models.SoldEvent{
 		NewOwner: event.sender,
 		TokenId:  event.tokenId,
 	}
 }
 
-func contractCreatedToEvent(subscribedEvent starnotary.StarnotaryCreated) genericEvent {
+func createdToGeneric(subscribedEvent starnotary.StarnotaryCreated) genericEvent {
 	return genericEvent{
 		sender:      common.Address.Hex(subscribedEvent.Owner),
 		tokenId:     subscribedEvent.TokenId.Text(10),
@@ -66,7 +66,7 @@ func contractCreatedToEvent(subscribedEvent starnotary.StarnotaryCreated) generi
 	}
 }
 
-func contractChangedNameToEvent(subscribedEvent starnotary.StarnotaryChangedName) genericEvent {
+func changedNameToGeneric(subscribedEvent starnotary.StarnotaryChangedName) genericEvent {
 	return genericEvent{
 		sender:    common.Address.Hex(subscribedEvent.Owner),
 		name:      string(subscribedEvent.NewName),
@@ -85,7 +85,7 @@ func contractChangedNameToEvent(subscribedEvent starnotary.StarnotaryChangedName
 	}
 }
 
-func contractPutForSaleToEvent(subscribedEvent starnotary.StarnotaryPutForSale) genericEvent {
+func putForSaleToGeneric(subscribedEvent starnotary.StarnotaryPutForSale) genericEvent {
 	return genericEvent{
 		sender:     common.Address.Hex(subscribedEvent.Owner),
 		tokenId:    subscribedEvent.TokenId.Text(10),
@@ -104,7 +104,7 @@ func contractPutForSaleToEvent(subscribedEvent starnotary.StarnotaryPutForSale) 
 	}
 }
 
-func contractRemovedFromSaleToEvent(subscribedEvent starnotary.StarnotaryRemovedFromSale) genericEvent {
+func removedFromSaleToGeneric(subscribedEvent starnotary.StarnotaryRemovedFromSale) genericEvent {
 	return genericEvent{
 		sender:    common.Address.Hex(subscribedEvent.Owner),
 		tokenId:   subscribedEvent.TokenId.Text(10),
@@ -122,7 +122,7 @@ func contractRemovedFromSaleToEvent(subscribedEvent starnotary.StarnotaryRemoved
 	}
 }
 
-func contractSoldToEvent(subscribedEvent starnotary.StarnotarySold) genericEvent {
+func soldToGeneric(subscribedEvent starnotary.StarnotarySold) genericEvent {
 	return genericEvent{
 		sender:    common.Address.Hex(subscribedEvent.NewOwner),
 		tokenId:   subscribedEvent.TokenId.Text(10),
@@ -140,21 +140,21 @@ func contractSoldToEvent(subscribedEvent starnotary.StarnotarySold) genericEvent
 	}
 }
 
-func logToEvent(logEvent types.Log) (event genericEvent) {
+func scrappedToGeneric(logEvent types.Log) (event genericEvent) {
 	eventSignature := logEvent.Topics[0].Hex()
 	eventType := eventSignatureToType[eventSignature]
 
 	switch eventType {
 	case "Created":
-		event = logCreatedToEvent(logEvent)
+		event = scrappedCreatedToGeneric(logEvent)
 	case "ChangedName":
-		event = logChangedNameToEvent(logEvent)
+		event = scrappedChangedNameToGeneric(logEvent)
 	case "PutForSale":
-		event = logPutForSaleToEvent(logEvent)
+		event = scrappedPutForSaleToGeneric(logEvent)
 	case "RemovedFromSale":
-		event = logRemovedFromSaleToEvent(logEvent)
+		event = scrappedRemovedFromSaleToGeneric(logEvent)
 	case "Sold":
-		event = logSoldToEvent(logEvent)
+		event = scrappedSoldToGeneric(logEvent)
 	default:
 		log.Printf("Tried to parse a non listened event: %+v\n\n", eventType)
 	}
@@ -162,42 +162,42 @@ func logToEvent(logEvent types.Log) (event genericEvent) {
 	return
 }
 
-func logCreatedToEvent(logEvent types.Log) genericEvent {
+func scrappedCreatedToGeneric(logEvent types.Log) genericEvent {
 	parsedCreated, err := eth.Contract.ParseCreated(logEvent)
 	if err != nil {
 		log.Printf("Could not parse log event: %+v\n\n", err)
 	}
-	return contractCreatedToEvent(*parsedCreated)
+	return createdToGeneric(*parsedCreated)
 }
 
-func logChangedNameToEvent(logEvent types.Log) genericEvent {
+func scrappedChangedNameToGeneric(logEvent types.Log) genericEvent {
 	parsedChangedName, err := eth.Contract.ParseChangedName(logEvent)
 	if err != nil {
 		log.Printf("Could not parse log event: %+v\n\n", err)
 	}
-	return contractChangedNameToEvent(*parsedChangedName)
+	return changedNameToGeneric(*parsedChangedName)
 }
 
-func logPutForSaleToEvent(logEvent types.Log) genericEvent {
+func scrappedPutForSaleToGeneric(logEvent types.Log) genericEvent {
 	parsedPutForSale, err := eth.Contract.ParsePutForSale(logEvent)
 	if err != nil {
 		log.Printf("Could not parse log event: %+v\n\n", err)
 	}
-	return contractPutForSaleToEvent(*parsedPutForSale)
+	return putForSaleToGeneric(*parsedPutForSale)
 }
 
-func logRemovedFromSaleToEvent(logEvent types.Log) genericEvent {
+func scrappedRemovedFromSaleToGeneric(logEvent types.Log) genericEvent {
 	parsedRemovedFromSale, err := eth.Contract.ParseRemovedFromSale(logEvent)
 	if err != nil {
 		log.Printf("Could not parse log event: %+v\n\n", err)
 	}
-	return contractRemovedFromSaleToEvent(*parsedRemovedFromSale)
+	return removedFromSaleToGeneric(*parsedRemovedFromSale)
 }
 
-func logSoldToEvent(logEvent types.Log) genericEvent {
+func scrappedSoldToGeneric(logEvent types.Log) genericEvent {
 	parsedSold, err := eth.Contract.ParseSold(logEvent)
 	if err != nil {
 		log.Printf("Could not parse log event: %+v\n\n", err)
 	}
-	return contractSoldToEvent(*parsedSold)
+	return soldToGeneric(*parsedSold)
 }

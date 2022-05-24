@@ -43,33 +43,33 @@ func Listen() {
 
 	for {
 		select {
-		case createdLog := <-createdResChan:
-			createdEvent := contractCreatedToEvent(*createdLog)
-			insertEvent(createdEvent)
-			log.Printf("Created Event To List: %+v\n\n", createdEvent)
-		case changedNameLog := <-changedNameResChan:
-			changedNameEvent := contractChangedNameToEvent(*changedNameLog)
-			insertEvent(changedNameEvent)
-			log.Printf("Changed Name Event To List: %+v\n\n", changedNameEvent)
-		case putForSaleLog := <-putForSaleResChan:
-			putForSaleEvent := contractPutForSaleToEvent(*putForSaleLog)
-			insertEvent(putForSaleEvent)
-			log.Printf("Put For Sale Event To List: %+v\n\n", putForSaleEvent)
-		case removedFromSaleLog := <-removedFromSaleResChan:
-			removedFromSaleEvent := contractRemovedFromSaleToEvent(*removedFromSaleLog)
-			insertEvent(removedFromSaleEvent)
-			log.Printf("Removed From Sale Event To List: %+v\n\n", removedFromSaleEvent)
-		case soldLog := <-soldResChan:
-			soldEvent := contractSoldToEvent(*soldLog)
-			insertEvent(soldEvent)
-			log.Printf("Sold Event To List: %+v\n\n", soldEvent)
+		case createdEvent := <-createdResChan:
+			genericCreated := createdToGeneric(*createdEvent)
+			insertEventByBlockNumber(genericCreated)
+			log.Printf("Created Event To List: %+v\n\n", genericCreated)
+		case changedNameEvent := <-changedNameResChan:
+			genericChangedName := changedNameToGeneric(*changedNameEvent)
+			insertEventByBlockNumber(genericChangedName)
+			log.Printf("Changed Name Event To List: %+v\n\n", genericChangedName)
+		case putForSaleEvent := <-putForSaleResChan:
+			genericPutForSale := putForSaleToGeneric(*putForSaleEvent)
+			insertEventByBlockNumber(genericPutForSale)
+			log.Printf("Put For Sale Event To List: %+v\n\n", genericPutForSale)
+		case removedFromSaleEvent := <-removedFromSaleResChan:
+			genericRemovedFromSale := removedFromSaleToGeneric(*removedFromSaleEvent)
+			insertEventByBlockNumber(genericRemovedFromSale)
+			log.Printf("Removed From Sale Event To List: %+v\n\n", genericRemovedFromSale)
+		case soldEvent := <-soldResChan:
+			genericSold := soldToGeneric(*soldEvent)
+			insertEventByBlockNumber(genericSold)
+			log.Printf("Sold Event To List: %+v\n\n", genericSold)
 		default:
-			if len(subscribedEventsList) > 0 {
+			if len(unconfirmedEventsList) > 0 {
 				currentBlock, err := eth.Client.BlockNumber(context.Background())
 				if err != nil {
 					log.Printf("Could not update current block number: %+v\n\n", err)
 				}
-				scrapAndConsume(currentBlock)
+				scrapAndConfirm(currentBlock)
 				removeOrphanedEvents(currentBlock)
 				time.Sleep(time.Duration(env.SleepIntervalSeconds) * time.Second)
 			}
@@ -77,9 +77,9 @@ func Listen() {
 	}
 }
 
-func scrapAndConsume(currentBlock uint64) {
+func scrapAndConfirm(currentBlock uint64) {
 	query := ethereum.FilterQuery{
-		FromBlock: big.NewInt(int64(subscribedEventsList[0].blockNumber)),
+		FromBlock: big.NewInt(int64(unconfirmedEventsList[0].blockNumber)),
 		ToBlock:   nil, /* nil will query to latest block */
 		Addresses: []common.Address{
 			common.HexToAddress(env.ContractAddress),
@@ -91,16 +91,16 @@ func scrapAndConsume(currentBlock uint64) {
 		log.Printf("Could not query contract logs: %+v\n\n", err)
 	}
 
-	for _, vLog := range logs {
-		listenedEvent := eventSignatureToType[vLog.Topics[0].Hex()]
-		if len(listenedEvent) == 0 {
+	for _, scrappedEvent := range logs {
+		listenedEventType := eventSignatureToType[scrappedEvent.Topics[0].Hex()]
+		if len(listenedEventType) == 0 {
 			/* if event is not listened to, ignore it */
 			continue
 		}
-		event := logToEvent(vLog)
+		event := scrappedToGeneric(scrappedEvent)
 		if event.removed {
 			/* if event was removed, remove it from list */
-			removeDuplicateEvents(event)
+			removeEvents(event)
 			continue
 		}
 		if currentBlock-event.blockNumber < env.ConfirmedThreshold {
@@ -114,26 +114,26 @@ func scrapAndConsume(currentBlock uint64) {
 			continue
 		}
 		consume(event)
-		removeDuplicateEvents(event)
+		removeEvents(event)
 	}
 }
 
 func consume(event genericEvent) {
 	switch event.eventType {
 	case "Created":
-		createdModel := eventToCreatedEvent(event)
+		createdModel := genericToCreatedModel(event)
 		log.Printf("Consuming created event: %+v\n\n", createdModel)
 	case "ChangedName":
-		changedNameModel := eventToChangedNameEvent(event)
+		changedNameModel := genericToChangedNameModel(event)
 		log.Printf("Consuming changed name event: %+v\n\n", changedNameModel)
 	case "PutForSale":
-		putForSaleModel := eventToPutForSaleEvent(event)
+		putForSaleModel := genericToPutForSaleModel(event)
 		log.Printf("Consuming put for sale event: %+v\n\n", putForSaleModel)
 	case "RemovedFromSale":
-		removedFromSaleModel := eventToRemovedFromSaleEvent(event)
+		removedFromSaleModel := genericToRemovedFromSaleModel(event)
 		log.Printf("Consuming removed from sale event: %+v\n\n", removedFromSaleModel)
 	case "Sold":
-		soldModel := eventToSoldEvent(event)
+		soldModel := genericToSoldModel(event)
 		log.Printf("Consuming sold event: %+v\n\n", soldModel)
 	}
 }
