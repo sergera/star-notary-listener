@@ -12,10 +12,9 @@ import (
 	"github.com/sergera/star-notary-listener/internal/env"
 	"github.com/sergera/star-notary-listener/internal/eth"
 	"github.com/sergera/star-notary-listener/internal/gocontracts/starnotary"
-	"github.com/sergera/star-notary-listener/internal/models"
 )
 
-var eventSignatureToName = map[string]string{
+var eventSignatureToType = map[string]string{
 	"0xc6c75e3dff0d786834a52d041dd27162b7b18821da7d44f32eda867409aff50b": "Created",
 	"0x5fcff9840e521b42af6784f574cc1da0706118211c0a01958aeea8b03cb2382b": "ChangedName",
 	"0xeef8701c784dcc5b12eb5ce2687a9e42d1d94b6e81f660dcb84b51554c37f082": "PutForSale",
@@ -80,7 +79,7 @@ func Listen() {
 
 func scrapAndConsume(currentBlock uint64) {
 	query := ethereum.FilterQuery{
-		FromBlock: big.NewInt(int64(subscribedEventsList[0].BlockNumber)),
+		FromBlock: big.NewInt(int64(subscribedEventsList[0].blockNumber)),
 		ToBlock:   nil, /* nil will query to latest block */
 		Addresses: []common.Address{
 			common.HexToAddress(env.ContractAddress),
@@ -93,18 +92,18 @@ func scrapAndConsume(currentBlock uint64) {
 	}
 
 	for _, vLog := range logs {
-		listenedEvent := eventSignatureToName[vLog.Topics[0].Hex()]
+		listenedEvent := eventSignatureToType[vLog.Topics[0].Hex()]
 		if len(listenedEvent) == 0 {
 			/* if event is not listened to, ignore it */
 			continue
 		}
 		event := logToEvent(vLog)
-		if event.Removed {
+		if event.removed {
 			/* if event was removed, remove it from list */
 			removeDuplicateEvents(event)
 			continue
 		}
-		if currentBlock-event.BlockNumber < env.ConfirmedThreshold {
+		if currentBlock-event.blockNumber < env.ConfirmedThreshold {
 			/* if event is not yet confirmed, ignore it */
 			continue
 		}
@@ -119,8 +118,8 @@ func scrapAndConsume(currentBlock uint64) {
 	}
 }
 
-func consume(event models.Event) {
-	switch event.EventName {
+func consume(event genericEvent) {
+	switch event.eventType {
 	case "Created":
 		createdModel := eventToCreatedEvent(event)
 		log.Printf("Consuming created event: %+v\n\n", createdModel)

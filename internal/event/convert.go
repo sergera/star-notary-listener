@@ -10,141 +10,141 @@ import (
 	"github.com/sergera/star-notary-listener/internal/models"
 )
 
-func eventToCreatedEvent(event models.Event) models.CreatedEvent {
+func eventToCreatedEvent(event genericEvent) models.CreatedEvent {
 	return models.CreatedEvent{
-		Owner:       event.Sender,
-		Name:        event.Name,
-		TokenId:     event.TokenId,
-		Coordinates: event.Coordinates,
+		Owner:       event.sender,
+		Name:        event.name,
+		TokenId:     event.tokenId,
+		Coordinates: event.coordinates,
 	}
 }
 
-func eventToChangedNameEvent(event models.Event) models.ChangedNameEvent {
+func eventToChangedNameEvent(event genericEvent) models.ChangedNameEvent {
 	return models.ChangedNameEvent{
-		NewName: event.Name,
-		TokenId: event.TokenId,
+		NewName: event.name,
+		TokenId: event.tokenId,
 	}
 }
 
-func eventToPutForSaleEvent(event models.Event) models.PutForSaleEvent {
+func eventToPutForSaleEvent(event genericEvent) models.PutForSaleEvent {
 	return models.PutForSaleEvent{
-		TokenId:    event.TokenId,
-		PriceInWei: event.PriceInWei,
+		TokenId:    event.tokenId,
+		PriceInWei: event.priceInWei,
 	}
 }
 
-func eventToRemovedFromSaleEvent(event models.Event) models.RemovedFromSaleEvent {
+func eventToRemovedFromSaleEvent(event genericEvent) models.RemovedFromSaleEvent {
 	return models.RemovedFromSaleEvent{
-		TokenId: event.TokenId,
+		TokenId: event.tokenId,
 	}
 }
 
-func eventToSoldEvent(event models.Event) models.SoldEvent {
+func eventToSoldEvent(event genericEvent) models.SoldEvent {
 	return models.SoldEvent{
-		NewOwner: event.Sender,
-		TokenId:  event.TokenId,
+		NewOwner: event.sender,
+		TokenId:  event.tokenId,
 	}
 }
 
-func contractCreatedToEvent(subscribedEvent starnotary.StarnotaryCreated) models.Event {
-	return models.Event{
-		Sender:      common.Address.Hex(subscribedEvent.Owner),
-		TokenId:     subscribedEvent.TokenId.Text(10),
-		Coordinates: string(subscribedEvent.Coordinates[:]),
-		Name:        string(subscribedEvent.Name),
-		EventName:   eventSignatureToName[subscribedEvent.Raw.Topics[0].Hex()],
+func contractCreatedToEvent(subscribedEvent starnotary.StarnotaryCreated) genericEvent {
+	return genericEvent{
+		sender:      common.Address.Hex(subscribedEvent.Owner),
+		tokenId:     subscribedEvent.TokenId.Text(10),
+		coordinates: string(subscribedEvent.Coordinates[:]),
+		name:        string(subscribedEvent.Name),
+		eventType:   eventSignatureToType[subscribedEvent.Raw.Topics[0].Hex()],
 
-		ContractHash: subscribedEvent.Raw.Address.Hex(),
-		Topics:       subscribedEvent.Raw.Topics,
-		Data:         subscribedEvent.Raw.Data,
-		BlockNumber:  subscribedEvent.Raw.BlockNumber,
-		TxHash:       subscribedEvent.Raw.TxHash.Hex(),
-		TxIndex:      subscribedEvent.Raw.TxIndex,
-		BlockHash:    subscribedEvent.Raw.BlockHash.Hex(),
-		LogIndex:     subscribedEvent.Raw.Index,
-		Removed:      subscribedEvent.Raw.Removed,
+		contractHash: subscribedEvent.Raw.Address.Hex(),
+		topics:       subscribedEvent.Raw.Topics,
+		data:         subscribedEvent.Raw.Data,
+		blockNumber:  subscribedEvent.Raw.BlockNumber,
+		txHash:       subscribedEvent.Raw.TxHash.Hex(),
+		txIndex:      subscribedEvent.Raw.TxIndex,
+		blockHash:    subscribedEvent.Raw.BlockHash.Hex(),
+		logIndex:     subscribedEvent.Raw.Index,
+		removed:      subscribedEvent.Raw.Removed,
 	}
 }
 
-func contractChangedNameToEvent(subscribedEvent starnotary.StarnotaryChangedName) models.Event {
-	return models.Event{
-		Sender:    common.Address.Hex(subscribedEvent.Owner),
-		Name:      string(subscribedEvent.NewName),
-		TokenId:   subscribedEvent.TokenId.Text(10),
-		EventName: eventSignatureToName[subscribedEvent.Raw.Topics[0].Hex()],
+func contractChangedNameToEvent(subscribedEvent starnotary.StarnotaryChangedName) genericEvent {
+	return genericEvent{
+		sender:    common.Address.Hex(subscribedEvent.Owner),
+		name:      string(subscribedEvent.NewName),
+		tokenId:   subscribedEvent.TokenId.Text(10),
+		eventType: eventSignatureToType[subscribedEvent.Raw.Topics[0].Hex()],
 
-		ContractHash: subscribedEvent.Raw.Address.Hex(),
-		Topics:       subscribedEvent.Raw.Topics,
-		Data:         subscribedEvent.Raw.Data,
-		BlockNumber:  subscribedEvent.Raw.BlockNumber,
-		TxHash:       subscribedEvent.Raw.TxHash.Hex(),
-		TxIndex:      subscribedEvent.Raw.TxIndex,
-		BlockHash:    subscribedEvent.Raw.BlockHash.Hex(),
-		LogIndex:     subscribedEvent.Raw.Index,
-		Removed:      subscribedEvent.Raw.Removed,
+		contractHash: subscribedEvent.Raw.Address.Hex(),
+		topics:       subscribedEvent.Raw.Topics,
+		data:         subscribedEvent.Raw.Data,
+		blockNumber:  subscribedEvent.Raw.BlockNumber,
+		txHash:       subscribedEvent.Raw.TxHash.Hex(),
+		txIndex:      subscribedEvent.Raw.TxIndex,
+		blockHash:    subscribedEvent.Raw.BlockHash.Hex(),
+		logIndex:     subscribedEvent.Raw.Index,
+		removed:      subscribedEvent.Raw.Removed,
 	}
 }
 
-func contractPutForSaleToEvent(subscribedEvent starnotary.StarnotaryPutForSale) models.Event {
-	return models.Event{
-		Sender:     common.Address.Hex(subscribedEvent.Owner),
-		TokenId:    subscribedEvent.TokenId.Text(10),
-		PriceInWei: subscribedEvent.PriceInWei.Text(10),
-		EventName:  eventSignatureToName[subscribedEvent.Raw.Topics[0].Hex()],
+func contractPutForSaleToEvent(subscribedEvent starnotary.StarnotaryPutForSale) genericEvent {
+	return genericEvent{
+		sender:     common.Address.Hex(subscribedEvent.Owner),
+		tokenId:    subscribedEvent.TokenId.Text(10),
+		priceInWei: subscribedEvent.PriceInWei.Text(10),
+		eventType:  eventSignatureToType[subscribedEvent.Raw.Topics[0].Hex()],
 
-		ContractHash: subscribedEvent.Raw.Address.Hex(),
-		Topics:       subscribedEvent.Raw.Topics,
-		Data:         subscribedEvent.Raw.Data,
-		BlockNumber:  subscribedEvent.Raw.BlockNumber,
-		TxHash:       subscribedEvent.Raw.TxHash.Hex(),
-		TxIndex:      subscribedEvent.Raw.TxIndex,
-		BlockHash:    subscribedEvent.Raw.BlockHash.Hex(),
-		LogIndex:     subscribedEvent.Raw.Index,
-		Removed:      subscribedEvent.Raw.Removed,
+		contractHash: subscribedEvent.Raw.Address.Hex(),
+		topics:       subscribedEvent.Raw.Topics,
+		data:         subscribedEvent.Raw.Data,
+		blockNumber:  subscribedEvent.Raw.BlockNumber,
+		txHash:       subscribedEvent.Raw.TxHash.Hex(),
+		txIndex:      subscribedEvent.Raw.TxIndex,
+		blockHash:    subscribedEvent.Raw.BlockHash.Hex(),
+		logIndex:     subscribedEvent.Raw.Index,
+		removed:      subscribedEvent.Raw.Removed,
 	}
 }
 
-func contractRemovedFromSaleToEvent(subscribedEvent starnotary.StarnotaryRemovedFromSale) models.Event {
-	return models.Event{
-		Sender:    common.Address.Hex(subscribedEvent.Owner),
-		TokenId:   subscribedEvent.TokenId.Text(10),
-		EventName: eventSignatureToName[subscribedEvent.Raw.Topics[0].Hex()],
+func contractRemovedFromSaleToEvent(subscribedEvent starnotary.StarnotaryRemovedFromSale) genericEvent {
+	return genericEvent{
+		sender:    common.Address.Hex(subscribedEvent.Owner),
+		tokenId:   subscribedEvent.TokenId.Text(10),
+		eventType: eventSignatureToType[subscribedEvent.Raw.Topics[0].Hex()],
 
-		ContractHash: subscribedEvent.Raw.Address.Hex(),
-		Topics:       subscribedEvent.Raw.Topics,
-		Data:         subscribedEvent.Raw.Data,
-		BlockNumber:  subscribedEvent.Raw.BlockNumber,
-		TxHash:       subscribedEvent.Raw.TxHash.Hex(),
-		TxIndex:      subscribedEvent.Raw.TxIndex,
-		BlockHash:    subscribedEvent.Raw.BlockHash.Hex(),
-		LogIndex:     subscribedEvent.Raw.Index,
-		Removed:      subscribedEvent.Raw.Removed,
+		contractHash: subscribedEvent.Raw.Address.Hex(),
+		topics:       subscribedEvent.Raw.Topics,
+		data:         subscribedEvent.Raw.Data,
+		blockNumber:  subscribedEvent.Raw.BlockNumber,
+		txHash:       subscribedEvent.Raw.TxHash.Hex(),
+		txIndex:      subscribedEvent.Raw.TxIndex,
+		blockHash:    subscribedEvent.Raw.BlockHash.Hex(),
+		logIndex:     subscribedEvent.Raw.Index,
+		removed:      subscribedEvent.Raw.Removed,
 	}
 }
 
-func contractSoldToEvent(subscribedEvent starnotary.StarnotarySold) models.Event {
-	return models.Event{
-		Sender:    common.Address.Hex(subscribedEvent.NewOwner),
-		TokenId:   subscribedEvent.TokenId.Text(10),
-		EventName: eventSignatureToName[subscribedEvent.Raw.Topics[0].Hex()],
+func contractSoldToEvent(subscribedEvent starnotary.StarnotarySold) genericEvent {
+	return genericEvent{
+		sender:    common.Address.Hex(subscribedEvent.NewOwner),
+		tokenId:   subscribedEvent.TokenId.Text(10),
+		eventType: eventSignatureToType[subscribedEvent.Raw.Topics[0].Hex()],
 
-		ContractHash: subscribedEvent.Raw.Address.Hex(),
-		Topics:       subscribedEvent.Raw.Topics,
-		Data:         subscribedEvent.Raw.Data,
-		BlockNumber:  subscribedEvent.Raw.BlockNumber,
-		TxHash:       subscribedEvent.Raw.TxHash.Hex(),
-		TxIndex:      subscribedEvent.Raw.TxIndex,
-		BlockHash:    subscribedEvent.Raw.BlockHash.Hex(),
-		LogIndex:     subscribedEvent.Raw.Index,
-		Removed:      subscribedEvent.Raw.Removed,
+		contractHash: subscribedEvent.Raw.Address.Hex(),
+		topics:       subscribedEvent.Raw.Topics,
+		data:         subscribedEvent.Raw.Data,
+		blockNumber:  subscribedEvent.Raw.BlockNumber,
+		txHash:       subscribedEvent.Raw.TxHash.Hex(),
+		txIndex:      subscribedEvent.Raw.TxIndex,
+		blockHash:    subscribedEvent.Raw.BlockHash.Hex(),
+		logIndex:     subscribedEvent.Raw.Index,
+		removed:      subscribedEvent.Raw.Removed,
 	}
 }
 
-func logToEvent(logEvent types.Log) (event models.Event) {
+func logToEvent(logEvent types.Log) (event genericEvent) {
 	eventSignature := logEvent.Topics[0].Hex()
-	eventName := eventSignatureToName[eventSignature]
+	eventType := eventSignatureToType[eventSignature]
 
-	switch eventName {
+	switch eventType {
 	case "Created":
 		event = logCreatedToEvent(logEvent)
 	case "ChangedName":
@@ -156,13 +156,13 @@ func logToEvent(logEvent types.Log) (event models.Event) {
 	case "Sold":
 		event = logSoldToEvent(logEvent)
 	default:
-		log.Printf("Tried to parse a non listened event: %+v\n\n", eventName)
+		log.Printf("Tried to parse a non listened event: %+v\n\n", eventType)
 	}
 
 	return
 }
 
-func logCreatedToEvent(logEvent types.Log) models.Event {
+func logCreatedToEvent(logEvent types.Log) genericEvent {
 	parsedCreated, err := eth.Contract.ParseCreated(logEvent)
 	if err != nil {
 		log.Printf("Could not parse log event: %+v\n\n", err)
@@ -170,7 +170,7 @@ func logCreatedToEvent(logEvent types.Log) models.Event {
 	return contractCreatedToEvent(*parsedCreated)
 }
 
-func logChangedNameToEvent(logEvent types.Log) models.Event {
+func logChangedNameToEvent(logEvent types.Log) genericEvent {
 	parsedChangedName, err := eth.Contract.ParseChangedName(logEvent)
 	if err != nil {
 		log.Printf("Could not parse log event: %+v\n\n", err)
@@ -178,7 +178,7 @@ func logChangedNameToEvent(logEvent types.Log) models.Event {
 	return contractChangedNameToEvent(*parsedChangedName)
 }
 
-func logPutForSaleToEvent(logEvent types.Log) models.Event {
+func logPutForSaleToEvent(logEvent types.Log) genericEvent {
 	parsedPutForSale, err := eth.Contract.ParsePutForSale(logEvent)
 	if err != nil {
 		log.Printf("Could not parse log event: %+v\n\n", err)
@@ -186,7 +186,7 @@ func logPutForSaleToEvent(logEvent types.Log) models.Event {
 	return contractPutForSaleToEvent(*parsedPutForSale)
 }
 
-func logRemovedFromSaleToEvent(logEvent types.Log) models.Event {
+func logRemovedFromSaleToEvent(logEvent types.Log) genericEvent {
 	parsedRemovedFromSale, err := eth.Contract.ParseRemovedFromSale(logEvent)
 	if err != nil {
 		log.Printf("Could not parse log event: %+v\n\n", err)
@@ -194,7 +194,7 @@ func logRemovedFromSaleToEvent(logEvent types.Log) models.Event {
 	return contractRemovedFromSaleToEvent(*parsedRemovedFromSale)
 }
 
-func logSoldToEvent(logEvent types.Log) models.Event {
+func logSoldToEvent(logEvent types.Log) genericEvent {
 	parsedSold, err := eth.Contract.ParseSold(logEvent)
 	if err != nil {
 		log.Printf("Could not parse log event: %+v\n\n", err)

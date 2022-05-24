@@ -3,24 +3,23 @@ package event
 import (
 	"bytes"
 
-	"github.com/sergera/star-notary-listener/internal/models"
 	"github.com/sergera/star-notary-listener/pkg/slc"
 )
 
-func isDuplicateEvent(event models.Event, duplicate models.Event) bool {
-	if !slc.ShallowEqual(event.Topics, duplicate.Topics) ||
-		event.BlockNumber != duplicate.BlockNumber ||
-		event.BlockHash != duplicate.BlockHash ||
-		event.LogIndex != duplicate.LogIndex ||
-		event.TxIndex != duplicate.TxIndex ||
-		event.TxHash != duplicate.TxHash ||
-		!bytes.Equal(event.Data, duplicate.Data) ||
-		event.Sender != duplicate.Sender ||
-		event.TokenId != duplicate.TokenId ||
-		event.Name != duplicate.Name ||
-		event.Coordinates != duplicate.Coordinates ||
-		event.PriceInWei != duplicate.PriceInWei ||
-		event.ContractHash != duplicate.ContractHash {
+func isDuplicateEvent(event genericEvent, duplicate genericEvent) bool {
+	if !slc.ShallowEqual(event.topics, duplicate.topics) ||
+		event.blockNumber != duplicate.blockNumber ||
+		event.blockHash != duplicate.blockHash ||
+		event.logIndex != duplicate.logIndex ||
+		event.txIndex != duplicate.txIndex ||
+		event.txHash != duplicate.txHash ||
+		!bytes.Equal(event.data, duplicate.data) ||
+		event.sender != duplicate.sender ||
+		event.tokenId != duplicate.tokenId ||
+		event.name != duplicate.name ||
+		event.coordinates != duplicate.coordinates ||
+		event.priceInWei != duplicate.priceInWei ||
+		event.contractHash != duplicate.contractHash {
 		return false
 	}
 	return true
