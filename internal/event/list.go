@@ -1,11 +1,11 @@
 package event
 
 import (
-	"log"
 	"sort"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/sergera/star-notary-listener/internal/env"
+	"github.com/sergera/star-notary-listener/internal/logger"
 	"github.com/sergera/star-notary-listener/pkg/slc"
 )
 
@@ -30,6 +30,24 @@ type genericEvent struct {
 	name        string
 }
 
+func (e *genericEvent) MarshalLogObject(enc logger.ObjectEncoder) error {
+	enc.AddString("contractHash", e.contractHash)
+	enc.AddString("eventType", e.eventType)
+	enc.AddString("data", string(e.data))
+	enc.AddUint64("blockNumber", e.blockNumber)
+	enc.AddString("txHash", e.txHash)
+	enc.AddUint("txIndex", e.txIndex)
+	enc.AddString("blockHash", e.blockHash)
+	enc.AddUint("logIndex", e.logIndex)
+	enc.AddBool("removed", e.removed)
+	enc.AddString("coordinates", e.coordinates)
+	enc.AddString("sender", e.sender)
+	enc.AddString("priceInWei", e.priceInWei)
+	enc.AddString("tokenId", e.tokenId)
+	enc.AddString("name", e.name)
+	return nil
+}
+
 func sortListByBlockNumber() {
 	sort.SliceStable(unconfirmedEventsList, func(i, j int) bool {
 		return unconfirmedEventsList[i].blockNumber < unconfirmedEventsList[j].blockNumber
@@ -44,7 +62,7 @@ func insertEventByBlockNumber(event genericEvent) {
 func removeEvents(event genericEvent) {
 	unconfirmedEventsList = slc.Filter(unconfirmedEventsList, func(duplicate genericEvent) bool {
 		if isDuplicateEvent(event, duplicate) {
-			log.Printf("Removing duplicate event: %+v\n\n", event)
+			logger.Info("Removing event", logger.Object("event", &event))
 		}
 		return !isDuplicateEvent(event, duplicate)
 	})
@@ -53,7 +71,7 @@ func removeEvents(event genericEvent) {
 func removeOrphanedEvents(currentBlock uint64) {
 	unconfirmedEventsList = slc.Filter(unconfirmedEventsList, func(orphan genericEvent) bool {
 		if currentBlock-orphan.blockNumber >= env.OrphanedThreshold {
-			log.Printf("Removing orphan event: %+v\n\n", orphan)
+			logger.Info("Removing orphan event", logger.Object("event", &orphan))
 		}
 		return currentBlock-orphan.blockNumber < env.OrphanedThreshold
 	})

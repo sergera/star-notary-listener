@@ -1,7 +1,6 @@
 package eth
 
 import (
-	"log"
 	"strings"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
@@ -9,6 +8,7 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/sergera/star-notary-listener/internal/env"
 	"github.com/sergera/star-notary-listener/internal/gocontracts/starnotary"
+	"github.com/sergera/star-notary-listener/internal/logger"
 )
 
 var Client *ethclient.Client
@@ -24,7 +24,7 @@ func Init() {
 func setClient() {
 	client, err := ethclient.Dial(env.InfuraWebsocketURL)
 	if err != nil {
-		log.Panicf("Could not dial eth client: %+v\n\n", err)
+		logger.Panic("Could not dial eth client", logger.String("error", err.Error()))
 	}
 
 	Client = client
@@ -34,7 +34,7 @@ func setContract() {
 	contractAddress := common.HexToAddress(env.ContractAddress)
 	starNotary, err := starnotary.NewStarnotary(contractAddress, Client)
 	if err != nil {
-		log.Panicf("Could not instance go contract: %+v\n\n", err)
+		logger.Panic("Could not instance go contract", logger.String("error", err.Error()))
 	}
 
 	Contract = starNotary
@@ -43,7 +43,7 @@ func setContract() {
 func setABI() {
 	starnotaryABI, err := abi.JSON(strings.NewReader(string(starnotary.StarnotaryMetaData.ABI)))
 	if err != nil {
-		log.Panicf("Could not read contract ABI: %+v\n\n", err)
+		logger.Panic("Could not read contract ABI", logger.String("error", err.Error()))
 	}
 
 	ABI = &starnotaryABI

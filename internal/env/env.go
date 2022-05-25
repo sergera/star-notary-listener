@@ -11,6 +11,7 @@ var ContractAddress string
 var ConfirmedThreshold uint64
 var OrphanedThreshold uint64
 var SleepIntervalSeconds uint64
+var LogPath string
 
 func Init() {
 	setInfuraWebsocketURL()
@@ -18,6 +19,7 @@ func Init() {
 	setConfirmedThreshold()
 	setOrphanedThreshold()
 	setSleepIntervalSeconds()
+	setLogPath()
 }
 
 func setInfuraWebsocketURL() {
@@ -46,7 +48,7 @@ func setConfirmedThreshold() {
 
 	confirmedThreshold, err := strconv.ParseUint(confirmedThresholdString, 10, 64)
 	if err != nil {
-		log.Panic("Could not convert confirmed threshold environment variable to uint")
+		log.Panicf("Could not convert confirmed threshold environment variable to uint: %+v\n", err)
 	}
 
 	ConfirmedThreshold = confirmedThreshold
@@ -60,7 +62,7 @@ func setOrphanedThreshold() {
 
 	orphanedThrehold, err := strconv.ParseUint(orphanedThresholdString, 10, 64)
 	if err != nil {
-		log.Panic("Could not convert orphaned threshold environment variable to uint")
+		log.Panicf("Could not convert orphaned threshold environment variable to uint: %+v\n", err)
 	}
 
 	OrphanedThreshold = orphanedThrehold
@@ -74,8 +76,17 @@ func setSleepIntervalSeconds() {
 
 	sleepIntervalSeconds, err := strconv.ParseUint(sleepIntervalSecondsString, 10, 64)
 	if err != nil {
-		log.Panic("Could not convert sleep interval seconds environment variable to uint")
+		log.Panicf("Could not convert sleep interval seconds environment variable to uint: %+v\n", err)
 	}
 
 	SleepIntervalSeconds = sleepIntervalSeconds
+}
+
+func setLogPath() {
+	logPath, exists := os.LookupEnv("LOG_PATH")
+	if !exists {
+		log.Panic("Log path environment variable not found")
+	}
+
+	LogPath = logPath
 }

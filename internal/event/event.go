@@ -2,7 +2,6 @@ package event
 
 import (
 	"context"
-	"log"
 	"math/big"
 	"time"
 
@@ -12,6 +11,7 @@ import (
 	"github.com/sergera/star-notary-listener/internal/env"
 	"github.com/sergera/star-notary-listener/internal/eth"
 	"github.com/sergera/star-notary-listener/internal/gocontracts/starnotary"
+	"github.com/sergera/star-notary-listener/internal/logger"
 )
 
 var eventSignatureToType = map[string]string{
@@ -46,28 +46,28 @@ func Listen() {
 		case createdEvent := <-createdResChan:
 			genericCreated := createdToGeneric(*createdEvent)
 			insertEventByBlockNumber(genericCreated)
-			log.Printf("Created Event To List: %+v\n\n", genericCreated)
+			logger.Info("Created event to list", logger.Object("event", &genericCreated))
 		case changedNameEvent := <-changedNameResChan:
 			genericChangedName := changedNameToGeneric(*changedNameEvent)
 			insertEventByBlockNumber(genericChangedName)
-			log.Printf("Changed Name Event To List: %+v\n\n", genericChangedName)
+			logger.Info("Changed name event to list", logger.Object("event", &genericChangedName))
 		case putForSaleEvent := <-putForSaleResChan:
 			genericPutForSale := putForSaleToGeneric(*putForSaleEvent)
 			insertEventByBlockNumber(genericPutForSale)
-			log.Printf("Put For Sale Event To List: %+v\n\n", genericPutForSale)
+			logger.Info("Put for sale event to list", logger.Object("event", &genericPutForSale))
 		case removedFromSaleEvent := <-removedFromSaleResChan:
 			genericRemovedFromSale := removedFromSaleToGeneric(*removedFromSaleEvent)
 			insertEventByBlockNumber(genericRemovedFromSale)
-			log.Printf("Removed From Sale Event To List: %+v\n\n", genericRemovedFromSale)
+			logger.Info("Removed from sale event to list", logger.Object("event", &genericRemovedFromSale))
 		case soldEvent := <-soldResChan:
 			genericSold := soldToGeneric(*soldEvent)
 			insertEventByBlockNumber(genericSold)
-			log.Printf("Sold Event To List: %+v\n\n", genericSold)
+			logger.Info("Sold event to list", logger.Object("event", &genericSold))
 		default:
 			if len(unconfirmedEventsList) > 0 {
 				currentBlock, err := eth.Client.BlockNumber(context.Background())
 				if err != nil {
-					log.Printf("Could not update current block number: %+v\n\n", err)
+					logger.Error("Could not update current block number", logger.String("error", err.Error()))
 				}
 				scrapAndConfirm(currentBlock)
 				removeOrphanedEvents(currentBlock)
@@ -88,7 +88,7 @@ func scrapAndConfirm(currentBlock uint64) {
 
 	logs, err := eth.Client.FilterLogs(context.Background(), query)
 	if err != nil {
-		log.Printf("Could not query contract logs: %+v\n\n", err)
+		logger.Error("Could not query contract logs", logger.String("error", err.Error()))
 	}
 
 	for _, scrappedEvent := range logs {
@@ -122,18 +122,18 @@ func consume(event genericEvent) {
 	switch event.eventType {
 	case "Created":
 		createdModel := genericToCreatedModel(event)
-		log.Printf("Consuming created event: %+v\n\n", createdModel)
+		logger.Info("Consuming created event", logger.Object("event", &createdModel))
 	case "ChangedName":
 		changedNameModel := genericToChangedNameModel(event)
-		log.Printf("Consuming changed name event: %+v\n\n", changedNameModel)
+		logger.Info("Consuming changed name event", logger.Object("event", &changedNameModel))
 	case "PutForSale":
 		putForSaleModel := genericToPutForSaleModel(event)
-		log.Printf("Consuming put for sale event: %+v\n\n", putForSaleModel)
+		logger.Info("Consuming put for sale event", logger.Object("event", &putForSaleModel))
 	case "RemovedFromSale":
 		removedFromSaleModel := genericToRemovedFromSaleModel(event)
-		log.Printf("Consuming removed from sale event: %+v\n\n", removedFromSaleModel)
+		logger.Info("Consuming removed from sale event", logger.Object("event", &removedFromSaleModel))
 	case "Sold":
 		soldModel := genericToSoldModel(event)
-		log.Printf("Consuming sold event: %+v\n\n", soldModel)
+		logger.Info("Consuming sold event", logger.Object("event", &soldModel))
 	}
 }
