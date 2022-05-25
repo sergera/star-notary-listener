@@ -1,12 +1,12 @@
 package logger
 
 import (
-	"log"
-	"time"
+	"os"
 
 	"github.com/sergera/star-notary-listener/internal/env"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"gopkg.in/natefinch/lumberjack.v2"
 )
 
 var logger *zap.Logger
@@ -72,31 +72,47 @@ type (
 )
 
 func Init() {
-	setLogger()
+	logger = newLogger()
 }
 
-func setLogger() {
-	loggerInstance, err := new()
-	if err != nil {
-		log.Panicf("Could not instance logger: %+v\n", err)
+func newEncoderConfig() zapcore.EncoderConfig {
+	return zapcore.EncoderConfig{
+		TimeKey:        "ts",
+		LevelKey:       "level",
+		NameKey:        "logger",
+		CallerKey:      "caller",
+		FunctionKey:    zapcore.OmitKey,
+		MessageKey:     "msg",
+		StacktraceKey:  "stacktrace",
+		LineEnding:     zapcore.DefaultLineEnding,
+		EncodeLevel:    zapcore.LowercaseLevelEncoder,
+		EncodeTime:     zapcore.ISO8601TimeEncoder,
+		EncodeDuration: zapcore.SecondsDurationEncoder,
+		EncodeCaller:   zapcore.ShortCallerEncoder,
 	}
-
-	logger = loggerInstance
 }
 
-func new() (*zap.Logger, error) {
-	cfg := zap.NewProductionConfig()
-	cfg.OutputPaths = []string{
-		env.LogPath + "starnotary.log",
-		"stderr",
-	}
-	cfg.EncoderConfig.EncodeTime = func(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
-		enc.AppendString(t.Format("2006-01-02T15:04:05.000Z0700"))
-	}
-	/* remove sampling CPU & I/O load cap so no logs are lost in concurrent use */
-	cfg.Sampling = nil
-	/* build with caller skip to log caller from client code */
-	return cfg.Build(zap.AddCallerSkip(1))
+func newLogger() *zap.Logger {
+	consoleEncoder := zapcore.NewConsoleEncoder(newEncoderConfig())
+	fileEncoder := zapcore.NewJSONEncoder(newEncoderConfig())
+
+	consoleSyncer := zapcore.AddSync(os.Stderr)
+	fileSyncer := zapcore.AddSync(&lumberjack.Logger{
+		Filename:   env.LogPath + "starnotary.log",
+		MaxSize:    5, // megabytes
+		MaxBackups: 3,
+	})
+
+	levelEnabler := zap.LevelEnablerFunc(func(lvl zapcore.Level) bool {
+		return lvl >= zapcore.DebugLevel
+	})
+
+	core := zapcore.NewTee(
+		zapcore.NewCore(consoleEncoder, consoleSyncer, levelEnabler),
+		zapcore.NewCore(fileEncoder, fileSyncer, levelEnabler),
+	)
+
+	return zap.New(core, zap.AddCaller(), zap.AddCallerSkip(1))
 }
 
 func Sync() error {
