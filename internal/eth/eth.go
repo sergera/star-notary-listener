@@ -15,7 +15,7 @@ var Client *ethclient.Client
 var Contract *starnotary.Starnotary
 var ABI *abi.ABI
 
-func Init() {
+func Setup() {
 	setClient()
 	setContract()
 	setABI()

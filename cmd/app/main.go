@@ -8,9 +8,9 @@ import (
 )
 
 func main() {
-	env.Init()
-	logger.Init()
+	env.Setup()
+	logger.Setup()
 	defer logger.Sync()
-	eth.Init()
+	eth.Setup()
 	event.Listen()
 }

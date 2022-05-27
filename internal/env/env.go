@@ -13,7 +13,7 @@ var OrphanedThreshold uint64
 var SleepIntervalSeconds uint64
 var LogPath string
 
-func Init() {
+func Setup() {
 	setInfuraWebsocketURL()
 	setContractAddress()
 	setConfirmedThreshold()

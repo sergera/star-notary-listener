@@ -71,7 +71,7 @@ type (
 	PrimitiveArrayEncoder = zapcore.PrimitiveArrayEncoder
 )
 
-func Init() {
+func Setup() {
 	logger = newLogger()
 }
 
