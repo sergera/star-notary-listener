@@ -25,7 +25,7 @@ help: ## Print this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
 start: ## Start the application with go run
-	@source ./scripts/env.bash $(PROJECT_ROOT_PATH) && ./scripts/devstart.bash
+	@source ./scripts/env.bash $(PROJECT_ROOT_PATH) && ./scripts/dev_start.bash
 
 install-eth-tools: ## Run go-ethereum make files to install abigen
 	go get github.com/ethereum/go-ethereum && cd $(GO_PATH)/pkg/mod/github.com/ethereum/go-ethereum* && sudo -E env "PATH=$$PATH" make && sudo -E env "PATH=$$PATH" make devtools

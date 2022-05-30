@@ -8,7 +8,7 @@
 # Starts application using go run
 
 # Usage:
-# devstart.bash
+# dev_start.bash
 
-source $(dirname ${BASH_SOURCE[0]})/rootpath.bash &&
-go run ${rootpath}/cmd/app/main.go
+source $(dirname ${BASH_SOURCE[0]})/root_path.bash &&
+go run ${root_path}/cmd/app/main.go

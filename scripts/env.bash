@@ -19,46 +19,46 @@
 
 echo "setting env variables"
 
-envpath=$1
+env_path=$1
 
-case $envpath in
-	*/) envpath="${envpath}env";;
-	*) envpath="${envpath}/env";;
+case $env_path in
+	*/) env_path="${env_path}env";;
+	*) env_path="${env_path}/env";;
 esac
 
-if [[ !(-f $envpath) ]]; then
+if [[ !(-f $env_path) ]]; then
 	echo "env file not found"
 	exit 1
 fi
 
-allowedname="^[A-Z_]+$"
-allowedvalue="^[0-9A-Za-z_/:.,\-]+$"
+allowed_name="^[A-Z_]+$"
+allowed_value="^[0-9A-Za-z_/:.,\-]+$"
 
 while IFS= read -r line || [ -n "$line" ]; do
-	linearr=($(echo $line | tr "=" "\n"))
-	varname=$(echo ${linearr[0]} | tr -d "\n")
-	varvalue=$(echo ${linearr[1]} | tr -d "\n")
+	line_arr=($(echo $line | tr "=" "\n"))
+	var_name=$(echo ${line_arr[0]} | tr -d "\n")
+	var_value=$(echo ${line_arr[1]} | tr -d "\n")
 
-	if [[ -z $varname ]]; then
+	if [[ -z $var_name ]]; then
 		echo "empty variable name"
 		exit 1
 	fi
 
-	if [[ -z $varvalue ]]; then
-		echo "empty variable value for $varname"
+	if [[ -z $var_value ]]; then
+		echo "empty variable value for $var_name"
 		exit 1
 	fi
 
-	if [[ !($varname =~ $allowedname) ]]; then
-		echo "invalid variable name: $varname"
+	if [[ !($var_name =~ $allowed_name) ]]; then
+		echo "invalid variable name: $var_name"
 		exit 1
 	fi
 
-	if [[ !($varvalue =~ $allowedvalue) ]]; then
-		echo "invalid variable value: $varvalue"
+	if [[ !($var_value =~ $allowed_value) ]]; then
+		echo "invalid variable value: $var_value"
 		exit 1
 	fi
 
-	export $varname=$varvalue
-	echo "$varname=$varvalue"
-done < "$envpath"
+	export $var_name=$var_value
+	echo "$var_name=$var_value"
+done < "$env_path"

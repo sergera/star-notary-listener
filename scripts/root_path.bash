@@ -9,8 +9,8 @@
 # Note that the script is dependant on project structure
 
 # Usage:
-# source projectroot.bash
+# source root_path.bash
 
-scriptpath="${BASH_SOURCE[0]}"
-while [ -h "$scriptpath" ]; do scriptpath="$(readlink "$scriptpath")"; done
-export rootpath="$( cd -P "$( dirname "$scriptpath" )/.." && pwd )"
+script_path="${BASH_SOURCE[0]}"
+while [ -h "$script_path" ]; do script_path="$(readlink "$script_path")"; done
+export root_path="$( cd -P "$( dirname "$script_path" )/.." && pwd )"
