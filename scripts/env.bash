@@ -5,8 +5,7 @@
 # Last Modified: 30th May 2022
 
 # Description:
-# Exports environment variables defined in a file named "env"
-# Receives one positional parameter with path to directory containing env file
+# Exports environment variables defined in a file named "env" in project root
 # Each line of the env file must be as follows
 #   ENV_VARIABLE_NAME=ENV_VARIABLE_VALUE with an optional NEWLINE in the end (\n)
 #		ENV_VARIABLE_NAME accepts upper case letters (A-Z) and underscores (_)
@@ -15,16 +14,12 @@
 #		and dashes (-)
 
 # Usage:
-# source env.bash DIRECTORYPATH
+# source env.bash
 
 echo "setting env variables"
 
-env_path=$1
-
-case $env_path in
-	*/) env_path="${env_path}env";;
-	*) env_path="${env_path}/env";;
-esac
+source $(dirname ${BASH_SOURCE[0]})/root_path.bash
+env_path=$root_path/env
 
 if [[ !(-f $env_path) ]]; then
 	echo "env file not found"
