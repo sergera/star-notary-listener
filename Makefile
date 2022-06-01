@@ -24,8 +24,8 @@ help: ## Print this help
 start: ## Start the application with go run
 	@source ./scripts/env.bash && ./scripts/dev_start.bash
 
-geth-devtools: ## Install go-ethereum dev tools in go binaries
-	@./scripts/install_geth_devtools.bash
+abigen: ## Install go-ethereum abigen tool in go binaries
+	@./scripts/install_abigen.bash
 
 generate-abi: ## Compile contract ABI using solc docker image and write to /build/contracts/CONTRACT_NAME/abi
 	mkdir -p build && mkdir -p build/contracts && mkdir -p build/contracts/$(CONTRACT_PACKAGE_NAME) && mkdir -p build/contracts/$(CONTRACT_PACKAGE_NAME)/abi && sudo docker pull ethereum/solc:$(SOLIDITY_VERSION) && sudo docker run --rm -v $(PROJECT_ROOT_PATH):/root -v $(TRUFFLE_PROJECT_ROOT_PATH):/truffle ethereum/solc:$(SOLIDITY_VERSION) openzeppelin-solidity=/truffle/node_modules/openzeppelin-solidity --abi /truffle/contracts/$(CONTRACT_NAME).sol --overwrite -o /root/build/contracts/$(CONTRACT_PACKAGE_NAME)/abi
