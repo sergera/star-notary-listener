@@ -23,31 +23,23 @@
 
 echo "installing abigen..."
 
-go_root=$(which go)
-if [[ -z $go_root ]]; then
-	echo "error: go not installed or not in PATH"
+this_dir=$(dirname "${BASH_SOURCE[0]}")
+
+go_paths_result=($($this_dir/get_go_paths.bash)) && {
+	go_root=${go_paths_result[0]}
+	go_path=${go_paths_result[1]}
+} || {
+	echo ${go_paths_result[*]}
 	exit 1
-fi
+}
 
-go_path=$(go env GOPATH)
-if [[ -z $go_path ]]; then
-	echo "error: could not get GOPATH"
+geth_version_result=$($this_dir/get_dependency_ver.bash go-ethereum) && {
+	project_geth_version=$geth_version_result
+	echo "project using geth version $project_geth_version"
+} || {
+	echo $geth_version_result
 	exit 1
-fi
-
-root_path=$($(dirname "${BASH_SOURCE[0]}")/root_path.bash)
-project_go_mod_path=$root_path/go.mod
-while IFS= read -r line || [ -n "$line" ]; do
-	case $line in
-		*/go-ethereum*) project_geth_version=${line#* v};;
-		*) ;;
-	esac
-
-	if [[ -n $project_geth_version ]]; then
-		break
-	fi
-done < "$project_go_mod_path"
-echo "project using geth version $project_geth_version"
+}
 
 function check_geth_module_versions() {
 	if [[ !($(compgen -G $go_path"/pkg/mod/github.com/ethereum/go-ethereum*")) ]]; then
