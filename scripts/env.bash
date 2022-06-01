@@ -2,7 +2,7 @@
 
 # Author: Sergio Joselli
 # Created: 30th May 2022
-# Last Modified: 31th May 2022
+# Last Modified: 1th June 2022
 
 # Description:
 # Exports environment variables defined in a file named "env" in project root
@@ -18,7 +18,7 @@
 
 echo "setting env variables..."
 
-source $(dirname ${BASH_SOURCE[0]})/root_path.bash
+root_path=$($(dirname "${BASH_SOURCE[0]}")/root_path.bash)
 env_path=$root_path/env
 
 if [[ !(-f $env_path) ]]; then

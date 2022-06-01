@@ -35,7 +35,7 @@ if [[ -z $go_path ]]; then
 	exit 1
 fi
 
-source $(dirname ${BASH_SOURCE[0]})/root_path.bash
+root_path=$($(dirname "${BASH_SOURCE[0]}")/root_path.bash)
 project_go_mod_path=$root_path/go.mod
 while IFS= read -r line || [ -n "$line" ]; do
 	case $line in
