@@ -39,7 +39,7 @@ dependency_version_result=$($this_dir/get_dependency_ver.bash go-ethereum) && {
 	exit 1
 }
 
-function check_geth_module_version() {
+check_geth_module_version() {
 	geth_version_result=$($this_dir/check_mod_ver.bash github.com/ethereum/go-ethereum $project_geth_version) && {
 		echo "geth version $geth_version_result found in modules cache"
 	} || {
@@ -49,7 +49,7 @@ function check_geth_module_version() {
 	}
 }
 
-function install() {
+install() {
 	geth_path=$go_path/pkg/mod/github.com/ethereum/go-ethereum@v$project_geth_version
 	(cd $geth_path && $(go install ./cmd/abigen))
 }
@@ -63,14 +63,14 @@ if [[ -x $go_path/bin/abigen ]]; then
 	if [[ $project_geth_version = $abigen_version ]]; then
 		echo "abigen already installed with correct version"
 		exit 0
-		else
+	else
 		echo "abigen version differs from geth version used in project"
 		check_geth_module_version
 		echo "overwriting abigen binary..."
 		install && exit 0
 	fi
 
-	else
+else
 	echo "abigen not detected in go binaries"
 	check_geth_module_version
 	echo "adding abigen binary..."
