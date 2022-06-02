@@ -2,7 +2,7 @@
 
 # Author: Sergio Joselli
 # Created: 30th May 2022
-# Last Modified: 1th June 2022
+# Last Modified: 2th June 2022
 
 # Description:
 # Exports environment variables defined in a file named "env" in project root
@@ -21,11 +21,11 @@ echo "setting env variables..."
 root_path=$($(dirname "${BASH_SOURCE[0]}")/root_path.bash)
 env_path=$root_path/env
 
-if [[ !(-f $env_path) ]]; then
+[ -f $env_path ] || {
 	echo "error: env file not found"
 	echo "there must be a file named 'env' in the project root directory"
 	exit 1
-fi
+}
 
 allowed_name="^[A-Z_]+$"
 allowed_value="^[0-9A-Za-z_/:.,\-]+$"
@@ -37,25 +37,25 @@ while IFS= read -r line || [ -n "$line" ]; do
 	var_name=$(echo ${line_arr[0]} | tr -d "\n")
 	var_value=$(echo ${line_arr[1]} | tr -d "\n")
 
-	if [[ -z $var_name ]]; then
+	[ -z $var_name ] && {
 		echo "error: empty variable name on line $line_counter"
 		exit 1
-	fi
+	}
 
-	if [[ -z $var_value ]]; then
+	[ -z $var_value ] && {
 		echo "error: empty variable value for $var_name"
 		exit 1
-	fi
+	}
 
-	if [[ !($var_name =~ $allowed_name) ]]; then
+	[[ $var_name =~ $allowed_name ]] || {
 		echo "error: invalid variable name $var_name"
 		exit 1
-	fi
+	}
 
-	if [[ !($var_value =~ $allowed_value) ]]; then
+	[[ $var_value =~ $allowed_value ]] || {
 		echo "error: invalid variable value $var_value for $var_name"
 		exit 1
-	fi
+	}
 
 	export $var_name=$var_value
 	echo "$var_name=$var_value"
