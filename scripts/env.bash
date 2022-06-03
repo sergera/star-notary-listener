@@ -6,12 +6,20 @@
 
 # Description:
 # Exports environment variables defined in a file named "env" in project root
+# Prints exported variable names and values to stdout
 # Each line of the env file must be as follows
 #   ENV_VARIABLE_NAME=ENV_VARIABLE_VALUE with an optional NEWLINE in the end (\n)
 #   ENV_VARIABLE_NAME accepts upper case letters (A-Z) and underscores (_)
 #   ENV_VARIABLE_VALUE accepts upper and lower case letters (A-Za-z), numbers (0-9),
 #   underscores (_), forward slashes (/), colons (:), full stops (.), commas (,)
 #   and dashes (-)
+#
+# Fails if there is no file named 'env' in the root directory, or if env file has
+# 1- a line without the equal character (=)
+# 2- a line with a whitespace character
+# 3- an empty variable name or value
+# 4- an invalid variable name or value
+# In case of failure it prints the error message to stdout
 
 # Usage:
 # source env.bash
@@ -34,13 +42,15 @@ allowed_name='^[A-Z_]+$'
 empty_var_value='^.*=$'
 allowed_value='^[0-9A-Za-z_/:.,\-]+$'
 
+var_names=()
+var_values=()
 line_counter=0
 while IFS= read -r line || [ -n "$line" ]; do
 	line_counter=$(( $line_counter + 1 ))
 
 	[[ $line =~ $has_equal_sign ]] || {
-		echo "error: no '=' sign on line $line_counter"
-		echo "lines must be formated like VARIABLE_NAME=VARIABLE_VALUE"
+		echo "error: missing '=' character on line $line_counter"
+		echo "lines must be formated like NAME=VALUE"
 		exit 1
 	}
 
@@ -75,6 +85,11 @@ while IFS= read -r line || [ -n "$line" ]; do
 		exit 1
 	}
 
-	export $var_name=$var_value
-	echo "$var_name=$var_value"
+	var_names+=($var_name)
+	var_values+=($var_value)
 done < "$env_path"
+
+for i in "${!var_names[@]}"; do
+	export ${var_names[$i]}=${var_values[$i]}
+	echo ${var_names[$i]}=${var_values[$i]}
+done
