@@ -40,7 +40,7 @@ module_path=$1
 
 illegal_module_path_char='^.*[][,;\!@#$%¨&*=+`´|(){}<>"'\''[:space:]]+.*$'
 [[ $module_path =~ $illegal_module_path_char ]] && {
-	echo "error: illegal go mod path characters in parameter $module_path"
+	echo "error: illegal go mod path characters in parameter '$module_path'"
 	exit 1
 }
 
@@ -75,7 +75,7 @@ while IFS= read -r line || [ -n "$line" ]; do
 done < "$project_go_mod_path"
 
 [[ -z $dependency_version ]] && {
-	echo "error: $module_path dependency not found"
+	echo "error: '$module_path' dependency not found"
 	exit 1
 }
 

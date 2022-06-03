@@ -69,18 +69,18 @@ while IFS= read -r line || [ -n "$line" ]; do
 	var_value=$(echo ${line_arr[1]} | tr -d "\n")
 
 	[[ $var_name =~ $allowed_name ]] || {
-		echo "error: invalid variable name $var_name"
+		echo "error: invalid variable name '$var_name'"
 		echo "allowed characters are A-Z_"
 		exit 1
 	}
 
 	[[ $line =~ $empty_var_value ]] && {
-		echo "error: empty variable value for $var_name"
+		echo "error: empty variable value for '$var_name'"
 		exit 1
 	}
 
 	[[ $var_value =~ $allowed_value ]] || {
-		echo "error: invalid variable value $var_value for $var_name"
+		echo "error: invalid variable value '$var_value' for '$var_name'"
 		echo "allowed characters are A-Za-z0-9/:.,_-"
 		exit 1
 	}

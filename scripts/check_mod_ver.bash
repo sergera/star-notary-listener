@@ -45,13 +45,13 @@ requested_version=$2
 
 illegal_module_path_char='^.*[][,;\!@#$%¨&*=+`´|(){}<>"'\''[:space:]]+.*$'
 [[ $module_path =~ $illegal_module_path_char ]] && {
-	echo "error: illegal go module path characters in parameter $module_path"
+	echo "error: illegal go module path characters in parameter '$module_path'"
 	exit 1
 }
 
 semver_format='^[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9a-z]+)*$'
 [[ $requested_version =~ $semver_format ]] && {
-	echo "error: invalid semver format in parameter $requested_version"
+	echo "error: invalid semver format in parameter '$requested_version'"
 	exit 1
 }
 
@@ -65,7 +65,7 @@ go_paths_result=($($this_dir/get_go_paths.bash)) && {
 }
 
 if [[ !($(compgen -G $go_path"/pkg/mod/$module_path*")) ]]; then
-	echo "error: $module_path not found in go modules cache"
+	echo "error: '$module_path' not found in go modules cache"
 	exit 1
 fi
 
@@ -78,5 +78,5 @@ for file in "$go_path"/pkg/mod/$module_path*; do
 	}
 done
 
-echo "error: module $module_path with version $requested_version not found"
+echo "error: module '$module_path' with version '$requested_version' not found"
 exit 1
