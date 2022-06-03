@@ -38,8 +38,7 @@ module_path=$1
 	exit 1
 }
 
-illegal_module_path_char='^.*[][,;\!@#$%¨&*=+`´|(){}<>"'\''
- 	]+.*$'
+illegal_module_path_char='^.*[][,;\!@#$%¨&*=+`´|(){}<>"'\''[:space:]]+.*$'
 [[ $module_path =~ $illegal_module_path_char ]] && {
 	echo "error: illegal go mod path characters in parameter $module_path"
 	exit 1

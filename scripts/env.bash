@@ -36,7 +36,7 @@ env_path=$root_path/env
 }
 
 has_equal_sign='^.*=.*$'
-has_whitespace='^.*[ 	].*$'
+has_whitespace='^.*[[:space:]].*$'
 empty_var_name='^=.*$'
 allowed_name='^[A-Z_]+$'
 empty_var_value='^.*=$'
