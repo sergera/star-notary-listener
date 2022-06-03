@@ -49,6 +49,9 @@ illegal_module_path_char='^.*[][,;\!@#$%¨&*=+`´|(){}<>"'\''[:space:]]+.*$'
 	exit 1
 }
 
+# translate uppercase to lowercase with a leading exclamation mark to match go modules cache
+module_path_cache_format=$(echo $module_path | sed --posix 's/[[:upper:]]/!&/g' | tr '[:upper:]' '[:lower:]')
+
 semver_format='^[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9a-z]+)*$'
 [[ $requested_version =~ $semver_format ]] && {
 	echo "error: invalid semver format in parameter '$requested_version'"
@@ -64,12 +67,12 @@ go_paths_result=($($this_dir/get_go_paths.bash)) && {
 	exit 1
 }
 
-if [[ !($(compgen -G $go_path"/pkg/mod/$module_path*")) ]]; then
+if [[ !($(compgen -G $go_path"/pkg/mod/$module_path_cache_format*")) ]]; then
 	echo "error: '$module_path' not found in go modules cache"
 	exit 1
 fi
 
-for file in "$go_path"/pkg/mod/$module_path*; do
+for file in "$go_path"/pkg/mod/$module_path_cache_format*; do
 	currently_read_version=${file##*@v}
 
 	[[ $currently_read_version = $requested_version ]] && {
