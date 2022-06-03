@@ -2,7 +2,7 @@
 
 # Author: Sergio Joselli
 # Created: 30th May 2022
-# Last Modified: 2th June 2022
+# Last Modified: 3th June 2022
 
 # Description:
 # Exports environment variables defined in a file named "env" in project root
@@ -27,33 +27,51 @@ env_path=$root_path/env
 	exit 1
 }
 
-allowed_name="^[A-Z_]+$"
-allowed_value="^[0-9A-Za-z_/:.,\-]+$"
+has_equal_sign='^.*=.*$'
+has_whitespace='^.*[ 	].*$'
+empty_var_name='^=.*$'
+allowed_name='^[A-Z_]+$'
+empty_var_value='^.*=$'
+allowed_value='^[0-9A-Za-z_/:.,\-]+$'
 
 line_counter=0
 while IFS= read -r line || [ -n "$line" ]; do
 	line_counter=$(( $line_counter + 1 ))
-	line_arr=($(echo $line | tr "=" "\n"))
-	var_name=$(echo ${line_arr[0]} | tr -d "\n")
-	var_value=$(echo ${line_arr[1]} | tr -d "\n")
 
-	[ -z $var_name ] && {
+	[[ $line =~ $has_equal_sign ]] || {
+		echo "error: no '=' sign on line $line_counter"
+		echo "lines must be formated like VARIABLE_NAME=VARIABLE_VALUE"
+		exit 1
+	}
+
+	[[ $line =~ $has_whitespace ]] && {
+		echo "error: whitespace character on line $line_counter"
+		exit 1
+	}
+
+	[[ $line =~ $empty_var_name ]] && {
 		echo "error: empty variable name on line $line_counter"
 		exit 1
 	}
 
-	[ -z $var_value ] && {
-		echo "error: empty variable value for $var_name"
-		exit 1
-	}
+	line_arr=($(echo $line | tr "=" "\n"))
+	var_name=$(echo ${line_arr[0]} | tr -d "\n")
+	var_value=$(echo ${line_arr[1]} | tr -d "\n")
 
 	[[ $var_name =~ $allowed_name ]] || {
 		echo "error: invalid variable name $var_name"
+		echo "allowed characters are A-Z_"
+		exit 1
+	}
+
+	[[ $line =~ $empty_var_value ]] && {
+		echo "error: empty variable value for $var_name"
 		exit 1
 	}
 
 	[[ $var_value =~ $allowed_value ]] || {
 		echo "error: invalid variable value $var_value for $var_name"
+		echo "allowed characters are A-Za-z0-9/:.,_-"
 		exit 1
 	}
 
