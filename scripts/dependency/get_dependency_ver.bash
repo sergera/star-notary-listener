@@ -2,7 +2,7 @@
 
 # Author: Sergio Joselli
 # Created: 1th June 2022
-# Last Modified: 1th June 2022
+# Last Modified: 6th June 2022
 
 # Description:
 # Prints version of a project dependency present in go.mod to stdout
@@ -29,11 +29,8 @@
 #	  error=$result
 # }
 
-this_dir=$(dirname "${BASH_SOURCE[0]}")
-project_go_mod_path=$($this_dir/root_path.bash)/go.mod
-
-module_path=$1
-[[ -z $module_path ]] && {
+module_path="$1"
+[ -z "$module_path" ] && {
 	echo "error: missing dependency module path positional parameter"
 	exit 1
 }
@@ -43,6 +40,9 @@ illegal_module_path_char='^.*[][,;\!@#$%¨&*=+`´|(){}<>"'\''[:space:]]+.*$'
 	echo "error: illegal go mod path characters in parameter '$module_path'"
 	exit 1
 }
+
+this_dir=$(dirname "${BASH_SOURCE[0]}")
+project_go_mod_path=$("$this_dir"/../get_root_path.bash)/go.mod
 
 dependency="^ *require *.*$"
 dependency_group_begin="^ *require *\( *$"
@@ -54,9 +54,9 @@ is_dependency_group_middle=false
 while IFS= read -r line || [ -n "$line" ]; do
 	[[ $line =~ $dependency_group_begin ]] && is_dependency_group_start=true
 	[[ $line =~ $dependency_group_end ]] && is_dependency_group_middle=false
-	[[ $line =~ $dependency ]] && [[ $is_dependency_group_start = false ]] && is_one_liner=true
+	[[ $line =~ $dependency ]] && [ "$is_dependency_group_start" = false ] && is_one_liner=true
 
-	if [[ $is_one_liner = true  ]] || [[ $is_dependency_group_middle = true ]]; then
+	if [ "$is_one_liner" = true  ] || [ "$is_dependency_group_middle" = true ]; then
 		case $line in
 			*$module_path*)
 				dependency_version=${line##* v}
@@ -65,19 +65,19 @@ while IFS= read -r line || [ -n "$line" ]; do
 		esac
 	fi
 
-	[[ -n $dependency_version ]] && break
+	[ -n "$dependency_version" ] && break
 
-	[[ $is_one_liner = true ]] && is_one_liner=false
-	[[ $is_dependency_group_start = true ]] && {
+	[ "$is_one_liner" = true ] && is_one_liner=false
+	[ "$is_dependency_group_start" = true ] && {
 		is_dependency_group_start=false
 		is_dependency_group_middle=true
 	}
 done < "$project_go_mod_path"
 
-[[ -z $dependency_version ]] && {
+[ -z "$dependency_version" ] && {
 	echo "error: '$module_path' dependency not found"
 	exit 1
 }
 
-echo $dependency_version
+echo "$dependency_version"
 exit 0

@@ -2,7 +2,7 @@
 
 # Author: Sergio Joselli
 # Created: 30th May 2022
-# Last Modified: 1th June 2022
+# Last Modified: 6th June 2022
 
 # Description:
 # Prints project root directory canonical path to stdout

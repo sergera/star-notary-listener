@@ -2,7 +2,7 @@
 
 # Author: Sergio Joselli
 # Created: 30th May 2022
-# Last Modified: 1th June 2022
+# Last Modified: 6th June 2022
 
 # Description:
 # Installs abigen according to the geth version used in the project
@@ -23,24 +23,24 @@ echo "installing abigen..."
 
 this_dir=$(dirname "${BASH_SOURCE[0]}")
 
-go_paths_result=($($this_dir/get_go_paths.bash)) && {
-	go_root=${go_paths_result[0]}
-	go_path=${go_paths_result[1]}
+go_paths_result=($("$this_dir"/../get_go_paths.bash)) && {
+	go_root="${go_paths_result[0]}"
+	go_path="${go_paths_result[1]}"
 } || {
-	echo ${go_paths_result[*]}
+	echo "${go_paths_result[*]}"
 	exit 1
 }
 
-dependency_version_result=$($this_dir/get_dependency_ver.bash go-ethereum) && {
-	project_geth_version=$dependency_version_result
+dependency_version_result=$("$this_dir"/../dependency/get_dependency_ver.bash go-ethereum) && {
+	project_geth_version="$dependency_version_result"
 	echo "project using geth version '$project_geth_version'"
 } || {
-	echo $dependency_version_result
+	echo "$dependency_version_result"
 	exit 1
 }
 
 check_geth_module_version() {
-	geth_version_result=$($this_dir/check_mod_ver.bash github.com/ethereum/go-ethereum $project_geth_version) && {
+	geth_version_result=$("$this_dir"/../dependency/check_mod_ver.bash github.com/ethereum/go-ethereum "$project_geth_version") && {
 		echo "geth version '$geth_version_result' found in modules cache"
 	} || {
 		echo "error: geth version '$project_geth_version' not found in go modules cache"
@@ -50,29 +50,29 @@ check_geth_module_version() {
 }
 
 install() {
-	geth_path=$go_path/pkg/mod/github.com/ethereum/go-ethereum@v$project_geth_version
-	(cd $geth_path && $(go install ./cmd/abigen))
+	geth_path="$go_path/pkg/mod/github.com/ethereum/go-ethereum@v$project_geth_version"
+	(cd "$geth_path" && $(go install ./cmd/abigen))
 }
 
-if [[ -x $go_path/bin/abigen ]]; then
-	abigen_version=$($go_path/bin/abigen -v)
+if [ -x "$go_path/bin/abigen" ]; then
+	abigen_version=$("$go_path"/bin/abigen -v)
 	abigen_version=${abigen_version##* }
 	abigen_version=${abigen_version%-*}
 	echo "abigen version '$abigen_version'"
 
-	if [[ $project_geth_version = $abigen_version ]]; then
+	if [ "$project_geth_version" = "$abigen_version" ]; then
 		echo "abigen already installed with correct version"
 		exit 0
 	else
 		echo "abigen version differs from geth version used in project"
 		check_geth_module_version
 		echo "overwriting abigen binary..."
-		install && exit 0
+		install && echo "abigen binary overwritten successfully" && exit 0
 	fi
 
 else
 	echo "abigen not detected in go binaries"
 	check_geth_module_version
 	echo "adding abigen binary..."
-	install && exit 0
+	install && echo "abigen binary added successfully" && exit 0
 fi

@@ -2,7 +2,7 @@
 
 # Author: Sergio Joselli
 # Created: 1th June 2022
-# Last Modified: 1th June 2022
+# Last Modified: 6th June 2022
 
 # Description:
 # Checks if go module is installed in GOPATH with the requested version
@@ -31,15 +31,10 @@
 #	  error=$result
 # }
 
-module_path=$1
-[[ -z $module_path ]] && {
-	echo "error: missing module path positional parameter"
-	exit 1
-}
-
-requested_version=$2
-[[ -z $requested_version ]] && {
-	echo "error: missing version positional parameter"
+module_path="$1"
+requested_version="$2"
+[ -z "$requested_version" ] && {
+	echo "error: missing positional parameter(s)"
 	exit 1
 }
 
@@ -49,34 +44,34 @@ illegal_module_path_char='^.*[][,;\!@#$%¨&*=+`´|(){}<>"'\''[:space:]]+.*$'
 	exit 1
 }
 
-# translate uppercase to lowercase with a leading exclamation mark to match go modules cache
-module_path_cache_format=$(echo $module_path | sed --posix 's/[[:upper:]]/!&/g' | tr '[:upper:]' '[:lower:]')
-
-semver_format='^[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9a-z]+)*$'
-[[ $requested_version =~ $semver_format ]] && {
+semver_format='^[0-9]+\.[0-9]+\.[0-9]+(-[.A-Za-z0-9]+)*$'
+[[ $requested_version =~ $semver_format ]] || {
 	echo "error: invalid semver format in parameter '$requested_version'"
 	exit 1
 }
 
+# translate uppercase to lowercase with a leading exclamation mark to match go modules cache
+module_path_cache_format=$(echo "$module_path" | sed --posix 's/[[:upper:]]/!&/g' | tr '[:upper:]' '[:lower:]')
+
 this_dir=$(dirname "${BASH_SOURCE[0]}")
-go_paths_result=($($this_dir/get_go_paths.bash)) && {
-	go_root=${go_paths_result[0]}
-	go_path=${go_paths_result[1]}
+go_paths_result=($($this_dir/../get_go_paths.bash)) && {
+	go_root="${go_paths_result[0]}"
+	go_path="${go_paths_result[1]}"
 } || {
-	echo ${go_paths_result[*]}
+	echo "${go_paths_result[*]}"
 	exit 1
 }
 
-if [[ !($(compgen -G $go_path"/pkg/mod/$module_path_cache_format*")) ]]; then
+[ "$(compgen -G $go_path/pkg/mod/$module_path_cache_format*)" ] || {
 	echo "error: '$module_path' not found in go modules cache"
 	exit 1
-fi
+}
 
-for file in "$go_path"/pkg/mod/$module_path_cache_format*; do
+for file in "$go_path/pkg/mod/$module_path_cache_format"*; do
 	currently_read_version=${file##*@v}
 
-	[[ $currently_read_version = $requested_version ]] && {
-		echo $currently_read_version
+	[ "$currently_read_version" = "$requested_version" ] && {
+		echo "$currently_read_version"
 		exit 0
 	}
 done

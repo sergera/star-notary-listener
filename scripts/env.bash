@@ -2,7 +2,7 @@
 
 # Author: Sergio Joselli
 # Created: 30th May 2022
-# Last Modified: 3th June 2022
+# Last Modified: 6th June 2022
 
 # Description:
 # Exports environment variables defined in a file named "env" in project root
@@ -26,10 +26,10 @@
 
 echo "setting env variables..."
 
-root_path=$($(dirname "${BASH_SOURCE[0]}")/root_path.bash)
+root_path=$($(dirname "${BASH_SOURCE[0]}")/get_root_path.bash)
 env_path=$root_path/env
 
-[ -f $env_path ] || {
+[ -f "$env_path" ] || {
 	echo "error: env file not found"
 	echo "there must be a file named 'env' in the project root directory"
 	exit 1

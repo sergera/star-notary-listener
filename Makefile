@@ -11,12 +11,11 @@ else
     $(error unsupported system: $(KERNEL_NAME))
 endif
 
-CONTRACT_NAME=StarNotary
+TRUFFLE_PROJECT_ROOT_PATH=
 SOLIDITY_VERSION=0.8.11
-DEPLOYED_NETWORK=rinkeby
+CONTRACT_NAME=StarNotary
 CONTRACT_PACKAGE_NAME=$(shell echo "$(CONTRACT_NAME)" | tr 'A-Z' 'a-z')
 PROJECT_ROOT_PATH:=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
-TRUFFLE_PROJECT_ROOT_PATH=~/code/star-notary
 
 help: ## Print this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
@@ -24,16 +23,8 @@ help: ## Print this help
 start: ## Start the application with go run
 	@source ./scripts/env.bash && ./scripts/dev_start.bash
 
-abigen: ## Install go-ethereum abigen tool in go binaries
-	@./scripts/install_abigen.bash
-
-generate-abi: ## Compile contract ABI using solc docker image and write to /build/contracts/CONTRACT_NAME/abi
-	mkdir -p build && mkdir -p build/contracts && mkdir -p build/contracts/$(CONTRACT_PACKAGE_NAME) && mkdir -p build/contracts/$(CONTRACT_PACKAGE_NAME)/abi && sudo docker pull ethereum/solc:$(SOLIDITY_VERSION) && sudo docker run --rm -v $(PROJECT_ROOT_PATH):/root -v $(TRUFFLE_PROJECT_ROOT_PATH):/truffle ethereum/solc:$(SOLIDITY_VERSION) openzeppelin-solidity=/truffle/node_modules/openzeppelin-solidity --abi /truffle/contracts/$(CONTRACT_NAME).sol --overwrite -o /root/build/contracts/$(CONTRACT_PACKAGE_NAME)/abi
-
-generate-bytecode: ## Compile EVM bytecode using solc docker image and write to /build/contracts/CONTRACT_NAME/bin
-	mkdir -p build && mkdir -p build/contracts && mkdir -p build/contracts/$(CONTRACT_PACKAGE_NAME) && mkdir -p build/contracts/$(CONTRACT_PACKAGE_NAME)/bin && sudo docker pull ethereum/solc:$(SOLIDITY_VERSION) && sudo docker run --rm -v $(PROJECT_ROOT_PATH):/root -v $(TRUFFLE_PROJECT_ROOT_PATH):/truffle ethereum/solc:$(SOLIDITY_VERSION) openzeppelin-solidity=/truffle/node_modules/openzeppelin-solidity --bin /truffle/contracts/$(CONTRACT_NAME).sol --overwrite -o /root/build/contracts/$(CONTRACT_PACKAGE_NAME)/bin
-
-generate-go-contract: ## Make Go contract file into /build/contracts/CONTRACT_NAME
-	mkdir -p internal && mkdir -p internal/$(CONTRACT_PACKAGE_NAME) && $(GO_PATH)/bin/abigen -bin=build/contracts/$(CONTRACT_PACKAGE_NAME)/bin/$(CONTRACT_NAME).bin --abi=build/contracts/$(CONTRACT_PACKAGE_NAME)/abi/$(CONTRACT_NAME).abi --pkg=$(CONTRACT_PACKAGE_NAME) --out=internal/gocontracts/$(CONTRACT_PACKAGE_NAME)/$(CONTRACT_PACKAGE_NAME).go
-
-generate: generate-abi generate-bytecode generate-go-contract ## Generate ABI, EVM bytecode, and Go contract file
+contract: ## Generate go contract file into internal/gocontracts/CONTRACT_PACKAGE_NAME
+	@./scripts/contract/install_abigen.bash
+	@./scripts/contract/generate_abi.bash $(SOLIDITY_VERSION) $(CONTRACT_NAME) $(CONTRACT_PACKAGE_NAME) $(TRUFFLE_PROJECT_ROOT_PATH)
+	@./scripts/contract/generate_bytecode.bash $(SOLIDITY_VERSION) $(CONTRACT_NAME) $(CONTRACT_PACKAGE_NAME) $(TRUFFLE_PROJECT_ROOT_PATH)
+	@./scripts/contract/generate_contract.bash $(CONTRACT_NAME) $(CONTRACT_PACKAGE_NAME)
