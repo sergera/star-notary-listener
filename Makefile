@@ -20,8 +20,8 @@ PROJECT_ROOT_PATH:=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 help: ## Print this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
-start: ## Start the application with go run
-	@source ./scripts/env.bash && ./scripts/dev_start.bash
+run: ## Start the application with go run
+	@source ./scripts/env.bash && go run cmd/app/*.go
 
 contract: ## Generate go contract file into internal/gocontracts/CONTRACT_PACKAGE_NAME
 	@./scripts/contract/install_abigen.bash
