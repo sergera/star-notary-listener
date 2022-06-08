@@ -68,12 +68,12 @@ func removeEvents(event genericEvent) {
 	})
 }
 
-func removeOrphanedEvents(currentBlock uint64) {
+func removeLeftoverEvents(currentBlock uint64) {
 	unconfirmedEventsList = slc.Filter(unconfirmedEventsList, func(orphan genericEvent) bool {
-		if currentBlock-orphan.blockNumber >= env.OrphanedThreshold {
-			logger.Info("Removing orphan event", logger.Object("event", &orphan))
+		if currentBlock-orphan.blockNumber > env.ConfirmedThreshold {
+			logger.Info("Removing leftover event", logger.Object("event", &orphan))
 		}
-		return currentBlock-orphan.blockNumber < env.OrphanedThreshold
+		return currentBlock-orphan.blockNumber <= env.ConfirmedThreshold
 	})
 }
 

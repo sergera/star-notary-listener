@@ -70,7 +70,7 @@ func Listen() {
 					logger.Error("Could not update current block number", logger.String("error", err.Error()))
 				}
 				scrapAndConfirm(currentBlock)
-				removeOrphanedEvents(currentBlock)
+				removeLeftoverEvents(currentBlock)
 				time.Sleep(time.Duration(env.SleepIntervalSeconds) * time.Second)
 			}
 		}
