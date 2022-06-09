@@ -20,6 +20,9 @@ PROJECT_ROOT_PATH:=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 help: ## Print this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
+install: ## Install dependencies to go modules cache
+	@go mod tidy
+
 run: ## Start the application with go run
 	@source ./scripts/env.bash && go run cmd/app/*.go
 
