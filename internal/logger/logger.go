@@ -3,7 +3,7 @@ package logger
 import (
 	"os"
 
-	"github.com/sergera/star-notary-listener/internal/env"
+	"github.com/sergera/star-notary-listener/internal/conf"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
@@ -98,7 +98,7 @@ func newLogger() *zap.Logger {
 
 	consoleSyncer := zapcore.AddSync(os.Stderr)
 	fileSyncer := zapcore.AddSync(&lumberjack.Logger{
-		Filename:   env.LogPath + "starnotary.log",
+		Filename:   conf.LogPath + "starnotary.log",
 		MaxSize:    5, // megabytes
 		MaxBackups: 3,
 	})

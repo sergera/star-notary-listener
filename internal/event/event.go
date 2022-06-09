@@ -8,7 +8,7 @@ import (
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/sergera/star-notary-listener/internal/env"
+	"github.com/sergera/star-notary-listener/internal/conf"
 	"github.com/sergera/star-notary-listener/internal/eth"
 	"github.com/sergera/star-notary-listener/internal/gocontracts/starnotary"
 	"github.com/sergera/star-notary-listener/internal/logger"
@@ -71,7 +71,7 @@ func Listen() {
 				}
 				scrapAndConfirm(currentBlock)
 				removeLeftoverEvents(currentBlock)
-				time.Sleep(time.Duration(env.SleepIntervalSeconds) * time.Second)
+				time.Sleep(time.Duration(conf.ConfirmationSleepSeconds) * time.Second)
 			}
 		}
 	}
@@ -82,7 +82,7 @@ func scrapAndConfirm(currentBlock uint64) {
 		FromBlock: big.NewInt(int64(unconfirmedEventsList[0].blockNumber)),
 		ToBlock:   nil, /* nil will query to latest block */
 		Addresses: []common.Address{
-			common.HexToAddress(env.ContractAddress),
+			common.HexToAddress(conf.ContractAddress),
 		},
 	}
 
@@ -103,7 +103,7 @@ func scrapAndConfirm(currentBlock uint64) {
 			removeEvents(event)
 			continue
 		}
-		if currentBlock-event.blockNumber < env.ConfirmedThreshold {
+		if currentBlock-event.blockNumber < conf.ConfirmationBlocks {
 			/* if event is not yet confirmed, ignore it */
 			continue
 		}

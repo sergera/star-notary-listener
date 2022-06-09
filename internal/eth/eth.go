@@ -6,7 +6,7 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/sergera/star-notary-listener/internal/env"
+	"github.com/sergera/star-notary-listener/internal/conf"
 	"github.com/sergera/star-notary-listener/internal/gocontracts/starnotary"
 	"github.com/sergera/star-notary-listener/internal/logger"
 )
@@ -22,7 +22,7 @@ func Setup() {
 }
 
 func setClient() {
-	client, err := ethclient.Dial(env.InfuraWebsocketURL)
+	client, err := ethclient.Dial(conf.RPCProviderWebsocketURL)
 	if err != nil {
 		logger.Panic("Could not dial eth client", logger.String("error", err.Error()))
 	}
@@ -31,7 +31,7 @@ func setClient() {
 }
 
 func setContract() {
-	contractAddress := common.HexToAddress(env.ContractAddress)
+	contractAddress := common.HexToAddress(conf.ContractAddress)
 	starNotary, err := starnotary.NewStarnotary(contractAddress, Client)
 	if err != nil {
 		logger.Panic("Could not instance go contract", logger.String("error", err.Error()))

@@ -4,6 +4,7 @@ go 1.18
 
 require (
 	github.com/ethereum/go-ethereum v1.10.17
+	github.com/gurkankaymak/hocon v1.2.4
 	go.uber.org/zap v1.21.0
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0
 )

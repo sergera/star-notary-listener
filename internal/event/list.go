@@ -4,7 +4,7 @@ import (
 	"sort"
 
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/sergera/star-notary-listener/internal/env"
+	"github.com/sergera/star-notary-listener/internal/conf"
 	"github.com/sergera/star-notary-listener/internal/logger"
 	"github.com/sergera/star-notary-listener/pkg/slc"
 )
@@ -70,10 +70,10 @@ func removeEvents(event genericEvent) {
 
 func removeLeftoverEvents(currentBlock uint64) {
 	unconfirmedEventsList = slc.Filter(unconfirmedEventsList, func(orphan genericEvent) bool {
-		if currentBlock-orphan.blockNumber > env.ConfirmedThreshold {
+		if currentBlock-orphan.blockNumber > conf.ConfirmationBlocks {
 			logger.Info("Removing leftover event", logger.Object("event", &orphan))
 		}
-		return currentBlock-orphan.blockNumber <= env.ConfirmedThreshold
+		return currentBlock-orphan.blockNumber <= conf.ConfirmationBlocks
 	})
 }
 
