@@ -24,7 +24,7 @@ install: ## Install dependencies to go modules cache
 	@go mod tidy
 
 run: ## Start the application with go run
-	@source ./scripts/env.bash && go run cmd/app/*.go
+	@go run cmd/app/*.go
 
 contract: ## Generate go contract file into internal/gocontracts/CONTRACT_PACKAGE_NAME
 	@./scripts/contract/install_abigen.bash
