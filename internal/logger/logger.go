@@ -98,7 +98,7 @@ func newLogger() *zap.Logger {
 
 	consoleSyncer := zapcore.AddSync(os.Stderr)
 	fileSyncer := zapcore.AddSync(&lumberjack.Logger{
-		Filename:   conf.LogPath + "starnotary.log",
+		Filename:   conf.LogPath + "star-notary-listener.log",
 		MaxSize:    5, // megabytes
 		MaxBackups: 3,
 	})
