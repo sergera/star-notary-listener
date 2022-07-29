@@ -11,6 +11,8 @@ var RPCProviderWebsocketURL string
 var ContractAddress string
 var ConfirmationBlocks uint64
 var ConfirmationSleepSeconds uint64
+var BackendHost string
+var BackendPort string
 var LogPath string
 
 var config *hocon.Config
@@ -21,6 +23,8 @@ func Setup() {
 	setContractAddress()
 	setConfirmationBlocks()
 	setConfirmationSleepSeconds()
+	setBackendHost()
+	setBackendPort()
 	setLogPath()
 }
 
@@ -79,6 +83,24 @@ func setConfirmationSleepSeconds() {
 	}
 
 	ConfirmationSleepSeconds = confirmationSleepSeconds
+}
+
+func setBackendHost() {
+	backendHost := config.GetString("backend.host")
+	if len(backendHost) == 0 {
+		log.Panic("Backend host environment variable not found")
+	}
+
+	BackendHost = backendHost
+}
+
+func setBackendPort() {
+	backendPort := config.GetString("backend.port")
+	if len(backendPort) == 0 {
+		log.Panic("Backend port environment variable not found")
+	}
+
+	BackendPort = backendPort
 }
 
 func setLogPath() {

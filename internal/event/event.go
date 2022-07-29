@@ -8,6 +8,7 @@ import (
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/sergera/star-notary-listener/internal/backend"
 	"github.com/sergera/star-notary-listener/internal/conf"
 	"github.com/sergera/star-notary-listener/internal/eth"
 	"github.com/sergera/star-notary-listener/internal/gocontracts/starnotary"
@@ -119,21 +120,32 @@ func scrapAndConfirm(currentBlock uint64) {
 }
 
 func consume(event genericEvent) {
+	var back *backend.Backend = backend.NewBackend()
 	switch event.eventType {
 	case "Created":
 		createdModel := genericToCreatedModel(event)
+		createdModel.Date = time.Now()
 		logger.Info("Consuming created event", logger.Object("event", &createdModel))
+		back.CreateStar(createdModel)
 	case "ChangedName":
 		changedNameModel := genericToChangedNameModel(event)
+		changedNameModel.Date = time.Now()
 		logger.Info("Consuming changed name event", logger.Object("event", &changedNameModel))
+		back.ChangeName(changedNameModel)
 	case "PutForSale":
 		putForSaleModel := genericToPutForSaleModel(event)
+		putForSaleModel.Date = time.Now()
 		logger.Info("Consuming put for sale event", logger.Object("event", &putForSaleModel))
+		back.PutForSale(putForSaleModel)
 	case "RemovedFromSale":
 		removedFromSaleModel := genericToRemovedFromSaleModel(event)
+		removedFromSaleModel.Date = time.Now()
 		logger.Info("Consuming removed from sale event", logger.Object("event", &removedFromSaleModel))
+		back.RemoveFromSale(removedFromSaleModel)
 	case "Sold":
 		soldModel := genericToSoldModel(event)
+		soldModel.Date = time.Now()
 		logger.Info("Consuming sold event", logger.Object("event", &soldModel))
+		back.Sell(soldModel)
 	}
 }

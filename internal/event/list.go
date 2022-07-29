@@ -1,6 +1,7 @@
 package event
 
 import (
+	"math/big"
 	"sort"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -23,11 +24,11 @@ type genericEvent struct {
 	logIndex     uint
 	removed      bool
 	/* specific event fields */
-	coordinates string
-	sender      string
-	priceInWei  string
-	tokenId     string
-	name        string
+	coordinates  string
+	sender       string
+	priceInEther big.Float
+	tokenId      string
+	name         string
 }
 
 func (e *genericEvent) MarshalLogObject(enc logger.ObjectEncoder) error {
@@ -42,7 +43,7 @@ func (e *genericEvent) MarshalLogObject(enc logger.ObjectEncoder) error {
 	enc.AddBool("removed", e.removed)
 	enc.AddString("coordinates", e.coordinates)
 	enc.AddString("sender", e.sender)
-	enc.AddString("priceInWei", e.priceInWei)
+	enc.AddString("priceInEther", e.priceInEther.String())
 	enc.AddString("tokenId", e.tokenId)
 	enc.AddString("name", e.name)
 	return nil

@@ -27,8 +27,8 @@ func genericToChangedNameModel(event genericEvent) models.ChangedNameEvent {
 
 func genericToPutForSaleModel(event genericEvent) models.PutForSaleEvent {
 	return models.PutForSaleEvent{
-		TokenId:    event.tokenId,
-		PriceInWei: event.priceInWei,
+		TokenId:      event.tokenId,
+		PriceInEther: event.priceInEther,
 	}
 }
 
@@ -86,10 +86,10 @@ func changedNameToGeneric(subscribedEvent starnotary.StarnotaryChangedName) gene
 
 func putForSaleToGeneric(subscribedEvent starnotary.StarnotaryPutForSale) genericEvent {
 	return genericEvent{
-		sender:     common.Address.Hex(subscribedEvent.Owner),
-		tokenId:    subscribedEvent.TokenId.Text(10),
-		priceInWei: subscribedEvent.PriceInWei.Text(10),
-		eventType:  eventSignatureToType[subscribedEvent.Raw.Topics[0].Hex()],
+		sender:       common.Address.Hex(subscribedEvent.Owner),
+		tokenId:      subscribedEvent.TokenId.Text(10),
+		priceInEther: *eth.WeiToEther(subscribedEvent.PriceInWei),
+		eventType:    eventSignatureToType[subscribedEvent.Raw.Topics[0].Hex()],
 
 		contractHash: subscribedEvent.Raw.Address.Hex(),
 		topics:       subscribedEvent.Raw.Topics,

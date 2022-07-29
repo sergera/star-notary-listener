@@ -18,7 +18,7 @@ func isDuplicateEvent(event genericEvent, duplicate genericEvent) bool {
 		event.tokenId != duplicate.tokenId ||
 		event.name != duplicate.name ||
 		event.coordinates != duplicate.coordinates ||
-		event.priceInWei != duplicate.priceInWei ||
+		event.priceInEther.String() != duplicate.priceInEther.String() ||
 		event.contractHash != duplicate.contractHash {
 		return false
 	}

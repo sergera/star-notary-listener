@@ -1,11 +1,13 @@
 package eth
 
 import (
+	"math/big"
 	"strings"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/ethereum/go-ethereum/params"
 	"github.com/sergera/star-notary-listener/internal/conf"
 	"github.com/sergera/star-notary-listener/internal/gocontracts/starnotary"
 	"github.com/sergera/star-notary-listener/internal/logger"
@@ -47,4 +49,14 @@ func setABI() {
 	}
 
 	ABI = &starnotaryABI
+}
+
+func WeiToEther(wei *big.Int) *big.Float {
+	f := new(big.Float)
+	f.SetPrec(236) //  IEEE 754 octuple-precision binary floating-point format: binary256
+	f.SetMode(big.ToNearestEven)
+	fWei := new(big.Float)
+	fWei.SetPrec(236) //  IEEE 754 octuple-precision binary floating-point format: binary256
+	fWei.SetMode(big.ToNearestEven)
+	return f.Quo(fWei.SetInt(wei), big.NewFloat(params.Ether))
 }
