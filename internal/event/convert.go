@@ -1,6 +1,9 @@
 package event
 
 import (
+	"math/big"
+	"strconv"
+
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/sergera/star-notary-listener/internal/eth"
@@ -15,6 +18,7 @@ func genericToCreatedModel(event genericEvent) models.CreatedEvent {
 		Name:        event.name,
 		TokenId:     event.tokenId,
 		Coordinates: event.coordinates,
+		Date:        event.date,
 	}
 }
 
@@ -22,6 +26,7 @@ func genericToChangedNameModel(event genericEvent) models.ChangedNameEvent {
 	return models.ChangedNameEvent{
 		NewName: event.name,
 		TokenId: event.tokenId,
+		Date:    event.date,
 	}
 }
 
@@ -29,12 +34,14 @@ func genericToPutForSaleModel(event genericEvent) models.PutForSaleEvent {
 	return models.PutForSaleEvent{
 		TokenId:      event.tokenId,
 		PriceInEther: event.priceInEther,
+		Date:         event.date,
 	}
 }
 
 func genericToRemovedFromSaleModel(event genericEvent) models.RemovedFromSaleEvent {
 	return models.RemovedFromSaleEvent{
 		TokenId: event.tokenId,
+		Date:    event.date,
 	}
 }
 
@@ -42,21 +49,24 @@ func genericToSoldModel(event genericEvent) models.SoldEvent {
 	return models.SoldEvent{
 		NewOwner: event.sender,
 		TokenId:  event.tokenId,
+		Date:     event.date,
 	}
 }
 
 func createdToGeneric(subscribedEvent starnotary.StarnotaryCreated) genericEvent {
+	blockNumberBig, _ := big.NewInt(0).SetString(strconv.FormatUint(subscribedEvent.Raw.BlockNumber, 10), 10)
 	return genericEvent{
-		sender:      common.Address.Hex(subscribedEvent.Owner),
-		tokenId:     subscribedEvent.TokenId.Text(10),
-		coordinates: string(subscribedEvent.Coordinates[:]),
-		name:        string(subscribedEvent.Name),
-		eventType:   eventSignatureToType[subscribedEvent.Raw.Topics[0].Hex()],
+		sender:       common.Address.Hex(subscribedEvent.Owner),
+		tokenId:      subscribedEvent.TokenId.Text(10),
+		coordinates:  string(subscribedEvent.Coordinates[:]),
+		name:         string(subscribedEvent.Name),
+		priceInEther: big.NewFloat(0),
+		eventType:    eventSignatureToType[subscribedEvent.Raw.Topics[0].Hex()],
 
 		contractHash: subscribedEvent.Raw.Address.Hex(),
 		topics:       subscribedEvent.Raw.Topics,
 		data:         subscribedEvent.Raw.Data,
-		blockNumber:  subscribedEvent.Raw.BlockNumber,
+		blockNumber:  blockNumberBig,
 		txHash:       subscribedEvent.Raw.TxHash.Hex(),
 		txIndex:      subscribedEvent.Raw.TxIndex,
 		blockHash:    subscribedEvent.Raw.BlockHash.Hex(),
@@ -66,16 +76,18 @@ func createdToGeneric(subscribedEvent starnotary.StarnotaryCreated) genericEvent
 }
 
 func changedNameToGeneric(subscribedEvent starnotary.StarnotaryChangedName) genericEvent {
+	blockNumberBig, _ := big.NewInt(0).SetString(strconv.FormatUint(subscribedEvent.Raw.BlockNumber, 10), 10)
 	return genericEvent{
-		sender:    common.Address.Hex(subscribedEvent.Owner),
-		name:      string(subscribedEvent.NewName),
-		tokenId:   subscribedEvent.TokenId.Text(10),
-		eventType: eventSignatureToType[subscribedEvent.Raw.Topics[0].Hex()],
+		sender:       common.Address.Hex(subscribedEvent.Owner),
+		name:         string(subscribedEvent.NewName),
+		tokenId:      subscribedEvent.TokenId.Text(10),
+		priceInEther: big.NewFloat(0),
+		eventType:    eventSignatureToType[subscribedEvent.Raw.Topics[0].Hex()],
 
 		contractHash: subscribedEvent.Raw.Address.Hex(),
 		topics:       subscribedEvent.Raw.Topics,
 		data:         subscribedEvent.Raw.Data,
-		blockNumber:  subscribedEvent.Raw.BlockNumber,
+		blockNumber:  blockNumberBig,
 		txHash:       subscribedEvent.Raw.TxHash.Hex(),
 		txIndex:      subscribedEvent.Raw.TxIndex,
 		blockHash:    subscribedEvent.Raw.BlockHash.Hex(),
@@ -85,16 +97,17 @@ func changedNameToGeneric(subscribedEvent starnotary.StarnotaryChangedName) gene
 }
 
 func putForSaleToGeneric(subscribedEvent starnotary.StarnotaryPutForSale) genericEvent {
+	blockNumberBig, _ := big.NewInt(0).SetString(strconv.FormatUint(subscribedEvent.Raw.BlockNumber, 10), 10)
 	return genericEvent{
 		sender:       common.Address.Hex(subscribedEvent.Owner),
 		tokenId:      subscribedEvent.TokenId.Text(10),
-		priceInEther: *eth.WeiToEther(subscribedEvent.PriceInWei),
+		priceInEther: eth.WeiToEther(subscribedEvent.PriceInWei),
 		eventType:    eventSignatureToType[subscribedEvent.Raw.Topics[0].Hex()],
 
 		contractHash: subscribedEvent.Raw.Address.Hex(),
 		topics:       subscribedEvent.Raw.Topics,
 		data:         subscribedEvent.Raw.Data,
-		blockNumber:  subscribedEvent.Raw.BlockNumber,
+		blockNumber:  blockNumberBig,
 		txHash:       subscribedEvent.Raw.TxHash.Hex(),
 		txIndex:      subscribedEvent.Raw.TxIndex,
 		blockHash:    subscribedEvent.Raw.BlockHash.Hex(),
@@ -104,15 +117,17 @@ func putForSaleToGeneric(subscribedEvent starnotary.StarnotaryPutForSale) generi
 }
 
 func removedFromSaleToGeneric(subscribedEvent starnotary.StarnotaryRemovedFromSale) genericEvent {
+	blockNumberBig, _ := big.NewInt(0).SetString(strconv.FormatUint(subscribedEvent.Raw.BlockNumber, 10), 10)
 	return genericEvent{
-		sender:    common.Address.Hex(subscribedEvent.Owner),
-		tokenId:   subscribedEvent.TokenId.Text(10),
-		eventType: eventSignatureToType[subscribedEvent.Raw.Topics[0].Hex()],
+		sender:       common.Address.Hex(subscribedEvent.Owner),
+		tokenId:      subscribedEvent.TokenId.Text(10),
+		priceInEther: big.NewFloat(0),
+		eventType:    eventSignatureToType[subscribedEvent.Raw.Topics[0].Hex()],
 
 		contractHash: subscribedEvent.Raw.Address.Hex(),
 		topics:       subscribedEvent.Raw.Topics,
 		data:         subscribedEvent.Raw.Data,
-		blockNumber:  subscribedEvent.Raw.BlockNumber,
+		blockNumber:  blockNumberBig,
 		txHash:       subscribedEvent.Raw.TxHash.Hex(),
 		txIndex:      subscribedEvent.Raw.TxIndex,
 		blockHash:    subscribedEvent.Raw.BlockHash.Hex(),
@@ -122,15 +137,17 @@ func removedFromSaleToGeneric(subscribedEvent starnotary.StarnotaryRemovedFromSa
 }
 
 func soldToGeneric(subscribedEvent starnotary.StarnotarySold) genericEvent {
+	blockNumberBig, _ := big.NewInt(0).SetString(strconv.FormatUint(subscribedEvent.Raw.BlockNumber, 10), 10)
 	return genericEvent{
-		sender:    common.Address.Hex(subscribedEvent.NewOwner),
-		tokenId:   subscribedEvent.TokenId.Text(10),
-		eventType: eventSignatureToType[subscribedEvent.Raw.Topics[0].Hex()],
+		sender:       common.Address.Hex(subscribedEvent.NewOwner),
+		tokenId:      subscribedEvent.TokenId.Text(10),
+		priceInEther: big.NewFloat(0),
+		eventType:    eventSignatureToType[subscribedEvent.Raw.Topics[0].Hex()],
 
 		contractHash: subscribedEvent.Raw.Address.Hex(),
 		topics:       subscribedEvent.Raw.Topics,
 		data:         subscribedEvent.Raw.Data,
-		blockNumber:  subscribedEvent.Raw.BlockNumber,
+		blockNumber:  blockNumberBig,
 		txHash:       subscribedEvent.Raw.TxHash.Hex(),
 		txIndex:      subscribedEvent.Raw.TxIndex,
 		blockHash:    subscribedEvent.Raw.BlockHash.Hex(),

@@ -3,6 +3,7 @@ package event
 import (
 	"context"
 	"math/big"
+	"strconv"
 	"time"
 
 	"github.com/ethereum/go-ethereum"
@@ -66,21 +67,22 @@ func Listen() {
 			logger.Info("Sold event to list", logger.Object("event", &genericSold))
 		default:
 			if len(unconfirmedEventsList) > 0 {
-				currentBlock, err := eth.Client.BlockNumber(context.Background())
+				latestBlock, err := eth.Client.BlockNumber(context.Background())
 				if err != nil {
 					logger.Error("Could not update current block number", logger.String("error", err.Error()))
 				}
-				scrapAndConfirm(currentBlock)
-				removeLeftoverEvents(currentBlock)
+				latestBlockBig, _ := big.NewInt(0).SetString(strconv.FormatUint(latestBlock, 10), 10)
+				scrapAndConfirm(latestBlockBig)
+				removeLeftoverEvents(latestBlockBig)
 				time.Sleep(time.Duration(conf.ConfirmationSleepSeconds) * time.Second)
 			}
 		}
 	}
 }
 
-func scrapAndConfirm(currentBlock uint64) {
+func scrapAndConfirm(latestBlock *big.Int) {
 	query := ethereum.FilterQuery{
-		FromBlock: big.NewInt(int64(unconfirmedEventsList[0].blockNumber)),
+		FromBlock: unconfirmedEventsList[0].blockNumber,
 		ToBlock:   nil, /* nil will query to latest block */
 		Addresses: []common.Address{
 			common.HexToAddress(conf.ContractAddress),
@@ -104,7 +106,8 @@ func scrapAndConfirm(currentBlock uint64) {
 			removeEvents(event)
 			continue
 		}
-		if currentBlock-event.blockNumber < conf.ConfirmationBlocks {
+		if big.NewInt(0).Sub(latestBlock, event.blockNumber).Cmp(big.NewInt(int64(conf.ConfirmationBlocks))) == -1 {
+			/* if latestBlock - eventBlockNumber < confirmationBlocks */
 			/* if event is not yet confirmed, ignore it */
 			continue
 		}
@@ -114,6 +117,13 @@ func scrapAndConfirm(currentBlock uint64) {
 			/* which would make the event be consumed again upon arrival */
 			continue
 		}
+		block, err := eth.Client.BlockByNumber(context.Background(), event.blockNumber)
+		if err != nil {
+			/* if fail to get block, return to try again */
+			logger.Error("Failed to get block", logger.String("message", err.Error()))
+			return
+		}
+		event.date = time.Unix(int64(block.Time()), 0)
 		consume(event)
 		removeEvents(event)
 	}
@@ -124,27 +134,22 @@ func consume(event genericEvent) {
 	switch event.eventType {
 	case "Created":
 		createdModel := genericToCreatedModel(event)
-		createdModel.Date = time.Now()
 		logger.Info("Consuming created event", logger.Object("event", &createdModel))
 		back.CreateStar(createdModel)
 	case "ChangedName":
 		changedNameModel := genericToChangedNameModel(event)
-		changedNameModel.Date = time.Now()
 		logger.Info("Consuming changed name event", logger.Object("event", &changedNameModel))
 		back.ChangeName(changedNameModel)
 	case "PutForSale":
 		putForSaleModel := genericToPutForSaleModel(event)
-		putForSaleModel.Date = time.Now()
 		logger.Info("Consuming put for sale event", logger.Object("event", &putForSaleModel))
 		back.PutForSale(putForSaleModel)
 	case "RemovedFromSale":
 		removedFromSaleModel := genericToRemovedFromSaleModel(event)
-		removedFromSaleModel.Date = time.Now()
 		logger.Info("Consuming removed from sale event", logger.Object("event", &removedFromSaleModel))
 		back.RemoveFromSale(removedFromSaleModel)
 	case "Sold":
 		soldModel := genericToSoldModel(event)
-		soldModel.Date = time.Now()
 		logger.Info("Consuming sold event", logger.Object("event", &soldModel))
 		back.Sell(soldModel)
 	}

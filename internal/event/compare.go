@@ -8,7 +8,7 @@ import (
 
 func isDuplicateEvent(event genericEvent, duplicate genericEvent) bool {
 	if !slc.ShallowEqual(event.topics, duplicate.topics) ||
-		event.blockNumber != duplicate.blockNumber ||
+		event.blockNumber.String() != duplicate.blockNumber.String() ||
 		event.blockHash != duplicate.blockHash ||
 		event.logIndex != duplicate.logIndex ||
 		event.txIndex != duplicate.txIndex ||
