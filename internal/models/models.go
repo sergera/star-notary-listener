@@ -9,7 +9,7 @@ import (
 
 type CreatedEvent struct {
 	Owner       string    `json:"owner"`
-	TokenId     string    `json:"tokenid"`
+	TokenId     string    `json:"token_id"`
 	Coordinates string    `json:"coordinates"`
 	Name        string    `json:"name"`
 	Date        time.Time `json:"date"`
@@ -26,7 +26,7 @@ func (e *CreatedEvent) MarshalLogObject(enc logger.ObjectEncoder) error {
 
 type ChangedNameEvent struct {
 	Owner   string    `json:"owner"`
-	TokenId string    `json:"tokenid"`
+	TokenId string    `json:"token_id"`
 	NewName string    `json:"name"`
 	Date    time.Time `json:"date"`
 }
@@ -41,7 +41,7 @@ func (e *ChangedNameEvent) MarshalLogObject(enc logger.ObjectEncoder) error {
 
 type PutForSaleEvent struct {
 	Owner        string     `json:"owner"`
-	TokenId      string     `json:"tokenid"`
+	TokenId      string     `json:"token_id"`
 	PriceInEther *big.Float `json:"price"`
 	Date         time.Time  `json:"date"`
 }
@@ -56,7 +56,7 @@ func (e *PutForSaleEvent) MarshalLogObject(enc logger.ObjectEncoder) error {
 
 type RemovedFromSaleEvent struct {
 	Owner   string    `json:"owner"`
-	TokenId string    `json:"tokenid"`
+	TokenId string    `json:"token_id"`
 	Date    time.Time `json:"date"`
 }
 
@@ -69,7 +69,7 @@ func (e *RemovedFromSaleEvent) MarshalLogObject(enc logger.ObjectEncoder) error 
 
 type SoldEvent struct {
 	NewOwner string    `json:"owner"`
-	TokenId  string    `json:"tokenid"`
+	TokenId  string    `json:"token_id"`
 	Date     time.Time `json:"date"`
 }
 
