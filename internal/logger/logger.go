@@ -93,6 +93,7 @@ func newEncoderConfig() zapcore.EncoderConfig {
 }
 
 func newLogger() *zap.Logger {
+	conf := conf.GetConf()
 	consoleEncoder := zapcore.NewConsoleEncoder(newEncoderConfig())
 	fileEncoder := zapcore.NewJSONEncoder(newEncoderConfig())
 

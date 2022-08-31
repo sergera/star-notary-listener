@@ -20,6 +20,7 @@ type Backend struct {
 }
 
 func NewBackend() *Backend {
+	conf := conf.GetConf()
 	return &Backend{
 		conf.BackendHost,
 		conf.BackendPort,

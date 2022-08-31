@@ -3,62 +3,76 @@ package conf
 import (
 	"log"
 	"strconv"
+	"sync"
 
 	"github.com/gurkankaymak/hocon"
 )
 
-var RPCProviderWebsocketURL string
-var ContractAddress string
-var ConfirmationBlocks uint64
-var ConfirmationSleepSeconds uint64
-var BackendHost string
-var BackendPort string
-var LogPath string
+var once sync.Once
+var instance *conf
 
-var config *hocon.Config
-
-func Setup() {
-	setConfig()
-	setRPCProviderWebsocketURL()
-	setContractAddress()
-	setConfirmationBlocks()
-	setConfirmationSleepSeconds()
-	setBackendHost()
-	setBackendPort()
-	setLogPath()
+type conf struct {
+	hocon                    *hocon.Config
+	RPCProviderWebsocketURL  string
+	ContractAddress          string
+	ConfirmationBlocks       uint64
+	ConfirmationSleepSeconds uint64
+	BackendHost              string
+	BackendPort              string
+	LogPath                  string
 }
 
-func setConfig() {
-	conf, err := hocon.ParseResource("application.conf")
+func GetConf() *conf {
+	once.Do(func() {
+		var c *conf = &conf{}
+		c.setup()
+		instance = c
+	})
+	return instance
+}
+
+func (c *conf) setup() {
+	c.setConfig()
+	c.setRPCProviderWebsocketURL()
+	c.setContractAddress()
+	c.setConfirmationBlocks()
+	c.setConfirmationSleepSeconds()
+	c.setBackendHost()
+	c.setBackendPort()
+	c.setLogPath()
+}
+
+func (c *conf) setConfig() {
+	hocon, err := hocon.ParseResource("application.conf")
 	if err != nil {
 		log.Panic("error while parsing configuration file: ", err)
 	}
 
-	log.Printf("all configuration: %+v", *conf)
+	log.Printf("configurations: %+v", *hocon)
 
-	config = conf
+	c.hocon = hocon
 }
 
-func setRPCProviderWebsocketURL() {
-	rpcProviderWebsocketURL := config.GetString("rpc-provider.websocket-url")
+func (c *conf) setRPCProviderWebsocketURL() {
+	rpcProviderWebsocketURL := c.hocon.GetString("rpc-provider.websocket-url")
 	if len(rpcProviderWebsocketURL) == 0 {
 		log.Panic("Infura websocket URL environment variable not found")
 	}
 
-	RPCProviderWebsocketURL = rpcProviderWebsocketURL
+	c.RPCProviderWebsocketURL = rpcProviderWebsocketURL
 }
 
-func setContractAddress() {
-	contractAddress := config.GetString("contract.address")
+func (c *conf) setContractAddress() {
+	contractAddress := c.hocon.GetString("contract.address")
 	if len(contractAddress) == 0 {
 		log.Panic("Contract address environment variable not found")
 	}
 
-	ContractAddress = contractAddress
+	c.ContractAddress = contractAddress
 }
 
-func setConfirmationBlocks() {
-	confirmationBlocksString := config.GetString("confirmation.blocks")
+func (c *conf) setConfirmationBlocks() {
+	confirmationBlocksString := c.hocon.GetString("confirmation.blocks")
 	if len(confirmationBlocksString) == 0 {
 		log.Panic("Confirmed threshold environment variable not found")
 	}
@@ -68,11 +82,11 @@ func setConfirmationBlocks() {
 		log.Panicf("Could not convert confirmed threshold environment variable to uint: %+v\n", err)
 	}
 
-	ConfirmationBlocks = confirmationBlocks
+	c.ConfirmationBlocks = confirmationBlocks
 }
 
-func setConfirmationSleepSeconds() {
-	confirmationSleepSecondsString := config.GetString("confirmation.sleep-seconds")
+func (c *conf) setConfirmationSleepSeconds() {
+	confirmationSleepSecondsString := c.hocon.GetString("confirmation.sleep-seconds")
 	if len(confirmationSleepSecondsString) == 0 {
 		log.Panic("Sleep interval seconds environment variable not found")
 	}
@@ -82,27 +96,27 @@ func setConfirmationSleepSeconds() {
 		log.Panicf("Could not convert sleep interval seconds environment variable to uint: %+v\n", err)
 	}
 
-	ConfirmationSleepSeconds = confirmationSleepSeconds
+	c.ConfirmationSleepSeconds = confirmationSleepSeconds
 }
 
-func setBackendHost() {
-	backendHost := config.GetString("backend.host")
+func (c *conf) setBackendHost() {
+	backendHost := c.hocon.GetString("backend.host")
 	if len(backendHost) == 0 {
 		log.Panic("Backend host environment variable not found")
 	}
 
-	BackendHost = backendHost
+	c.BackendHost = backendHost
 }
 
-func setBackendPort() {
-	backendPort := config.GetString("backend.port")
+func (c *conf) setBackendPort() {
+	backendPort := c.hocon.GetString("backend.port")
 	if len(backendPort) == 0 {
 		log.Panic("Backend port environment variable not found")
 	}
 
-	BackendPort = backendPort
+	c.BackendPort = backendPort
 }
 
-func setLogPath() {
-	LogPath = config.GetString("log-path")
+func (c *conf) setLogPath() {
+	c.LogPath = c.hocon.GetString("log-path")
 }

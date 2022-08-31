@@ -74,6 +74,7 @@ func removeEvents(event genericEvent) {
 }
 
 func removeLeftoverEvents(latestBlock *big.Int) {
+	conf := conf.GetConf()
 	unconfirmedEventsList = slc.Filter(unconfirmedEventsList, func(orphan genericEvent) bool {
 		if big.NewInt(0).Sub(latestBlock, orphan.blockNumber).Cmp(big.NewInt(int64(conf.ConfirmationBlocks))) == 1 {
 			/* if latestBlock - orphanBlockNumber > confirmationBlocks */

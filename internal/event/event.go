@@ -25,6 +25,9 @@ var eventSignatureToType = map[string]string{
 }
 
 func Listen() {
+	conf := conf.GetConf()
+	eth := eth.GetEth()
+
 	createdResChan := make(chan *starnotary.StarnotaryCreated)
 	changedNameResChan := make(chan *starnotary.StarnotaryChangedName)
 	putForSaleResChan := make(chan *starnotary.StarnotaryPutForSale)
@@ -81,6 +84,9 @@ func Listen() {
 }
 
 func scrapAndConfirm(latestBlock *big.Int) {
+	conf := conf.GetConf()
+	eth := eth.GetEth()
+
 	query := ethereum.FilterQuery{
 		FromBlock: unconfirmedEventsList[0].blockNumber,
 		ToBlock:   nil, /* nil will query to latest block */

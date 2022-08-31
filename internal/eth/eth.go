@@ -1,8 +1,11 @@
 package eth
 
 import (
+	"context"
 	"math/big"
 	"strings"
+	"sync"
+	"time"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
@@ -13,42 +16,69 @@ import (
 	"github.com/sergera/star-notary-listener/internal/logger"
 )
 
-var Client *ethclient.Client
-var Contract *starnotary.Starnotary
-var ABI *abi.ABI
+var once sync.Once
+var instance *eth
 
-func Setup() {
-	setClient()
-	setContract()
-	setABI()
+type eth struct {
+	Client   *ethclient.Client
+	Contract *starnotary.Starnotary
+	ABI      *abi.ABI
 }
 
-func setClient() {
+func GetEth() *eth {
+	once.Do(func() {
+		var e *eth = &eth{}
+		e.setup()
+		instance = e
+	})
+	return instance
+}
+
+func (e *eth) setup() {
+	e.setClient()
+	e.setContract()
+	e.setABI()
+	go e.avoidProviderTimeout()
+}
+
+func (e *eth) setClient() {
+	conf := conf.GetConf()
 	client, err := ethclient.Dial(conf.RPCProviderWebsocketURL)
 	if err != nil {
 		logger.Panic("Could not dial eth client", logger.String("error", err.Error()))
 	}
 
-	Client = client
+	e.Client = client
 }
 
-func setContract() {
+func (e *eth) avoidProviderTimeout() {
+	for {
+		_, err := e.Client.BlockNumber(context.Background())
+		if err != nil {
+			logger.Error("Disconnected: " + err.Error())
+		}
+		time.Sleep(30 * time.Second)
+	}
+}
+
+func (e *eth) setContract() {
+	conf := conf.GetConf()
 	contractAddress := common.HexToAddress(conf.ContractAddress)
-	starNotary, err := starnotary.NewStarnotary(contractAddress, Client)
+	starNotary, err := starnotary.NewStarnotary(contractAddress, e.Client)
 	if err != nil {
 		logger.Panic("Could not instance go contract", logger.String("error", err.Error()))
 	}
 
-	Contract = starNotary
+	e.Contract = starNotary
 }
 
-func setABI() {
+func (e *eth) setABI() {
 	starnotaryABI, err := abi.JSON(strings.NewReader(string(starnotary.StarnotaryMetaData.ABI)))
 	if err != nil {
 		logger.Panic("Could not read contract ABI", logger.String("error", err.Error()))
 	}
 
-	ABI = &starnotaryABI
+	e.ABI = &starnotaryABI
 }
 
 func WeiToEther(wei *big.Int) *big.Float {

@@ -179,6 +179,7 @@ func scrappedToGeneric(logEvent types.Log) (event genericEvent) {
 }
 
 func scrappedCreatedToGeneric(logEvent types.Log) genericEvent {
+	eth := eth.GetEth()
 	parsedCreated, err := eth.Contract.ParseCreated(logEvent)
 	if err != nil {
 		logger.Error("Could not parse scrapped created event", logger.String("error", err.Error()))
@@ -187,6 +188,7 @@ func scrappedCreatedToGeneric(logEvent types.Log) genericEvent {
 }
 
 func scrappedChangedNameToGeneric(logEvent types.Log) genericEvent {
+	eth := eth.GetEth()
 	parsedChangedName, err := eth.Contract.ParseChangedName(logEvent)
 	if err != nil {
 		logger.Error("Could not parse scrapped changed name event", logger.String("error", err.Error()))
@@ -195,6 +197,7 @@ func scrappedChangedNameToGeneric(logEvent types.Log) genericEvent {
 }
 
 func scrappedPutForSaleToGeneric(logEvent types.Log) genericEvent {
+	eth := eth.GetEth()
 	parsedPutForSale, err := eth.Contract.ParsePutForSale(logEvent)
 	if err != nil {
 		logger.Error("Could not parse scrapped put for sale event", logger.String("error", err.Error()))
@@ -203,6 +206,7 @@ func scrappedPutForSaleToGeneric(logEvent types.Log) genericEvent {
 }
 
 func scrappedRemovedFromSaleToGeneric(logEvent types.Log) genericEvent {
+	eth := eth.GetEth()
 	parsedRemovedFromSale, err := eth.Contract.ParseRemovedFromSale(logEvent)
 	if err != nil {
 		logger.Error("Could not parse scrapped removed from sale event", logger.String("error", err.Error()))
@@ -211,6 +215,7 @@ func scrappedRemovedFromSaleToGeneric(logEvent types.Log) genericEvent {
 }
 
 func scrappedSoldToGeneric(logEvent types.Log) genericEvent {
+	eth := eth.GetEth()
 	parsedSold, err := eth.Contract.ParseSold(logEvent)
 	if err != nil {
 		logger.Error("Could not parse scrapped sold event", logger.String("error", err.Error()))
