@@ -132,7 +132,7 @@ func (b Backend) ChangeName(e models.ChangedNameEvent) error {
 		return err
 	}
 
-	err = b.Put("name", m)
+	err = b.Put("set-name", m)
 	if err != nil {
 		return err
 	}
@@ -151,7 +151,7 @@ func (b Backend) PutForSale(e models.PutForSaleEvent) error {
 		return err
 	}
 
-	err = b.Put("put-for-sale", m)
+	err = b.Put("set-price", m)
 	if err != nil {
 		return err
 	}
