@@ -3,6 +3,7 @@ package event
 import (
 	"math/big"
 	"strconv"
+	"strings"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
@@ -33,7 +34,7 @@ func genericToChangedNameModel(event genericEvent) models.ChangedNameEvent {
 func genericToPutForSaleModel(event genericEvent) models.PutForSaleEvent {
 	return models.PutForSaleEvent{
 		TokenId:      event.tokenId,
-		PriceInEther: event.priceInEther,
+		PriceInEther: strings.TrimRight(event.priceInEther.Text('f', 18), ".0"),
 		Date:         event.date,
 	}
 }

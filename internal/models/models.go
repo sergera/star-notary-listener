@@ -1,7 +1,6 @@
 package models
 
 import (
-	"math/big"
 	"time"
 
 	"github.com/sergera/star-notary-listener/internal/logger"
@@ -40,16 +39,16 @@ func (e *ChangedNameEvent) MarshalLogObject(enc logger.ObjectEncoder) error {
 }
 
 type PutForSaleEvent struct {
-	Owner        string     `json:"owner"`
-	TokenId      string     `json:"token_id"`
-	PriceInEther *big.Float `json:"price"`
-	Date         time.Time  `json:"date"`
+	Owner        string    `json:"owner"`
+	TokenId      string    `json:"token_id"`
+	PriceInEther string    `json:"price"`
+	Date         time.Time `json:"date"`
 }
 
 func (e *PutForSaleEvent) MarshalLogObject(enc logger.ObjectEncoder) error {
 	enc.AddString("Owner", e.Owner)
 	enc.AddString("TokenId", e.TokenId)
-	enc.AddString("PriceInEther", e.PriceInEther.String())
+	enc.AddString("PriceInEther", e.PriceInEther)
 	enc.AddString("Date", e.Date.String())
 	return nil
 }
