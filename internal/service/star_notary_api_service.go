@@ -1,4 +1,4 @@
-package backend
+package service
 
 import (
 	"bytes"
@@ -10,24 +10,24 @@ import (
 	"github.com/sergera/star-notary-listener/internal/logger"
 )
 
-type Backend struct {
+type StarNotaryAPIService struct {
 	host        string
 	port        string
 	contentType string
 	client      *http.Client
 }
 
-func NewBackend() *Backend {
+func NewStarNotaryAPIService() *StarNotaryAPIService {
 	conf := conf.GetConf()
-	return &Backend{
-		conf.BackendHost,
-		conf.BackendPort,
+	return &StarNotaryAPIService{
+		conf.StarNotaryAPIHost,
+		conf.StarNotaryAPIPort,
 		"application/json; charset=UTF-8",
 		&http.Client{},
 	}
 }
 
-func (b Backend) Post(route string, jsonData []byte) error {
+func (b StarNotaryAPIService) Post(route string, jsonData []byte) error {
 	request, err := http.NewRequest("POST", b.host+":"+b.port+"/"+route, bytes.NewBuffer(jsonData))
 	if err != nil {
 		logger.Error(
@@ -43,7 +43,7 @@ func (b Backend) Post(route string, jsonData []byte) error {
 	response, err := client.Do(request)
 	if err != nil {
 		logger.Error(
-			"Failed backend post request",
+			"Failed post request",
 			logger.String("message", err.Error()),
 			logger.String("status", response.Status),
 		)
@@ -54,7 +54,7 @@ func (b Backend) Post(route string, jsonData []byte) error {
 	return nil
 }
 
-func (b Backend) Put(route string, jsonData []byte) error {
+func (b StarNotaryAPIService) Put(route string, jsonData []byte) error {
 	request, err := http.NewRequest("PUT", b.host+":"+b.port+"/"+route, bytes.NewBuffer(jsonData))
 	if err != nil {
 		logger.Error(
@@ -70,7 +70,7 @@ func (b Backend) Put(route string, jsonData []byte) error {
 	response, err := client.Do(request)
 	if err != nil {
 		logger.Error(
-			"Failed backend put request",
+			"Failed put request",
 			logger.String("message", err.Error()),
 			logger.String("status", response.Status),
 		)
@@ -81,7 +81,7 @@ func (b Backend) Put(route string, jsonData []byte) error {
 	return nil
 }
 
-func (b Backend) CreateStar(e domain.CreatedEvent) error {
+func (b StarNotaryAPIService) CreateStar(e domain.CreatedEvent) error {
 	m, err := json.Marshal(e)
 	if err != nil {
 		logger.Error(
@@ -100,7 +100,7 @@ func (b Backend) CreateStar(e domain.CreatedEvent) error {
 	return nil
 }
 
-func (b Backend) ChangeName(e domain.ChangedNameEvent) error {
+func (b StarNotaryAPIService) ChangeName(e domain.ChangedNameEvent) error {
 	m, err := json.Marshal(e)
 	if err != nil {
 		logger.Error(
@@ -119,7 +119,7 @@ func (b Backend) ChangeName(e domain.ChangedNameEvent) error {
 	return nil
 }
 
-func (b Backend) PutForSale(e domain.PutForSaleEvent) error {
+func (b StarNotaryAPIService) PutForSale(e domain.PutForSaleEvent) error {
 	m, err := json.Marshal(e)
 	if err != nil {
 		logger.Error(
@@ -138,7 +138,7 @@ func (b Backend) PutForSale(e domain.PutForSaleEvent) error {
 	return nil
 }
 
-func (b Backend) RemoveFromSale(e domain.RemovedFromSaleEvent) error {
+func (b StarNotaryAPIService) RemoveFromSale(e domain.RemovedFromSaleEvent) error {
 	m, err := json.Marshal(e)
 	if err != nil {
 		logger.Error(
@@ -157,7 +157,7 @@ func (b Backend) RemoveFromSale(e domain.RemovedFromSaleEvent) error {
 	return nil
 }
 
-func (b Backend) Sell(e domain.SoldEvent) error {
+func (b StarNotaryAPIService) Sell(e domain.SoldEvent) error {
 	m, err := json.Marshal(e)
 	if err != nil {
 		logger.Error(

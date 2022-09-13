@@ -17,8 +17,8 @@ type conf struct {
 	ContractAddress          string
 	ConfirmationBlocks       uint64
 	ConfirmationSleepSeconds uint64
-	BackendHost              string
-	BackendPort              string
+	StarNotaryAPIHost        string
+	StarNotaryAPIPort        string
 	LogPath                  string
 }
 
@@ -37,8 +37,8 @@ func (c *conf) setup() {
 	c.setContractAddress()
 	c.setConfirmationBlocks()
 	c.setConfirmationSleepSeconds()
-	c.setBackendHost()
-	c.setBackendPort()
+	c.setStarNotaryAPIHost()
+	c.setStarNotaryAPIPort()
 	c.setLogPath()
 }
 
@@ -99,22 +99,22 @@ func (c *conf) setConfirmationSleepSeconds() {
 	c.ConfirmationSleepSeconds = confirmationSleepSeconds
 }
 
-func (c *conf) setBackendHost() {
-	backendHost := c.hocon.GetString("backend.host")
-	if len(backendHost) == 0 {
-		log.Panic("Backend host environment variable not found")
+func (c *conf) setStarNotaryAPIHost() {
+	starNotaryAPIHost := c.hocon.GetString("star-notary-api.host")
+	if len(starNotaryAPIHost) == 0 {
+		log.Panic("Star notary api host environment variable not found")
 	}
 
-	c.BackendHost = backendHost
+	c.StarNotaryAPIHost = starNotaryAPIHost
 }
 
-func (c *conf) setBackendPort() {
-	backendPort := c.hocon.GetString("backend.port")
-	if len(backendPort) == 0 {
-		log.Panic("Backend port environment variable not found")
+func (c *conf) setStarNotaryAPIPort() {
+	starNotaryAPIPort := c.hocon.GetString("star-notary-api.port")
+	if len(starNotaryAPIPort) == 0 {
+		log.Panic("Star notary api port environment variable not found")
 	}
 
-	c.BackendPort = backendPort
+	c.StarNotaryAPIPort = starNotaryAPIPort
 }
 
 func (c *conf) setLogPath() {
