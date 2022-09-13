@@ -31,7 +31,7 @@ func (b StarNotaryAPIService) Post(route string, jsonData []byte) error {
 	request, err := http.NewRequest("POST", b.host+":"+b.port+"/"+route, bytes.NewBuffer(jsonData))
 	if err != nil {
 		logger.Error(
-			"Failed to create post request",
+			"failed to create post request",
 			logger.String("message", err.Error()),
 		)
 		return err
@@ -43,7 +43,7 @@ func (b StarNotaryAPIService) Post(route string, jsonData []byte) error {
 	response, err := client.Do(request)
 	if err != nil {
 		logger.Error(
-			"Failed post request",
+			"failed post request",
 			logger.String("message", err.Error()),
 			logger.String("status", response.Status),
 		)
@@ -58,7 +58,7 @@ func (b StarNotaryAPIService) Put(route string, jsonData []byte) error {
 	request, err := http.NewRequest("PUT", b.host+":"+b.port+"/"+route, bytes.NewBuffer(jsonData))
 	if err != nil {
 		logger.Error(
-			"Failed to create put request",
+			"failed to create put request",
 			logger.String("message", err.Error()),
 		)
 		return err
@@ -70,7 +70,7 @@ func (b StarNotaryAPIService) Put(route string, jsonData []byte) error {
 	response, err := client.Do(request)
 	if err != nil {
 		logger.Error(
-			"Failed put request",
+			"failed put request",
 			logger.String("message", err.Error()),
 			logger.String("status", response.Status),
 		)
@@ -85,7 +85,7 @@ func (b StarNotaryAPIService) CreateStar(e domain.CreatedEvent) error {
 	m, err := json.Marshal(e)
 	if err != nil {
 		logger.Error(
-			"Failed to marshal event model into json",
+			"failed to marshal event model into json",
 			logger.String("message", err.Error()),
 			logger.Object("event", &e),
 		)
@@ -104,7 +104,7 @@ func (b StarNotaryAPIService) ChangeName(e domain.ChangedNameEvent) error {
 	m, err := json.Marshal(e)
 	if err != nil {
 		logger.Error(
-			"Failed to marshal event model into json",
+			"failed to marshal event model into json",
 			logger.String("message", err.Error()),
 			logger.Object("event", &e),
 		)
@@ -123,7 +123,7 @@ func (b StarNotaryAPIService) PutForSale(e domain.PutForSaleEvent) error {
 	m, err := json.Marshal(e)
 	if err != nil {
 		logger.Error(
-			"Failed to marshal event model into json",
+			"failed to marshal event model into json",
 			logger.String("message", err.Error()),
 			logger.Object("event", &e),
 		)
@@ -142,7 +142,7 @@ func (b StarNotaryAPIService) RemoveFromSale(e domain.RemovedFromSaleEvent) erro
 	m, err := json.Marshal(e)
 	if err != nil {
 		logger.Error(
-			"Failed to marshal event model into json",
+			"failed to marshal event model into json",
 			logger.String("message", err.Error()),
 			logger.Object("event", &e),
 		)
@@ -161,7 +161,7 @@ func (b StarNotaryAPIService) Sell(e domain.SoldEvent) error {
 	m, err := json.Marshal(e)
 	if err != nil {
 		logger.Error(
-			"Failed to marshal event model into json",
+			"failed to marshal event model into json",
 			logger.String("message", err.Error()),
 			logger.Object("event", &e),
 		)

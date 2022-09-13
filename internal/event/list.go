@@ -27,7 +27,7 @@ func insertEventByBlockNumber(event domain.GenericEvent) {
 func removeEvents(event domain.GenericEvent) {
 	unconfirmedEventsList = slc.Filter(unconfirmedEventsList, func(duplicate domain.GenericEvent) bool {
 		if isDuplicateEvent(event, duplicate) {
-			logger.Info("Removing event", logger.Object("event", &event))
+			logger.Info("removing event", logger.Object("event", &event))
 		}
 		return !isDuplicateEvent(event, duplicate)
 	})
@@ -38,7 +38,7 @@ func removeLeftoverEvents(latestBlock *big.Int) {
 	unconfirmedEventsList = slc.Filter(unconfirmedEventsList, func(orphan domain.GenericEvent) bool {
 		if big.NewInt(0).Sub(latestBlock, orphan.BlockNumber).Cmp(big.NewInt(int64(conf.ConfirmationBlocks))) == 1 {
 			/* if latestBlock - orphanBlockNumber > confirmationBlocks */
-			logger.Info("Removing leftover event", logger.Object("event", &orphan))
+			logger.Info("removing leftover event", logger.Object("event", &orphan))
 		}
 		/* return latestBlock - orphanBlockNumber <= confirmationBlocks */
 		return big.NewInt(0).Sub(latestBlock, orphan.BlockNumber).Cmp(big.NewInt(int64(conf.ConfirmationBlocks))) != 1

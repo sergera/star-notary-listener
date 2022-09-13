@@ -46,7 +46,7 @@ func (e *eth) setClient() {
 	conf := conf.GetConf()
 	client, err := ethclient.Dial(conf.RPCProviderWebsocketURL)
 	if err != nil {
-		logger.Panic("Could not dial eth client", logger.String("error", err.Error()))
+		logger.Panic("could not dial eth client", logger.String("message", err.Error()))
 	}
 
 	e.Client = client
@@ -56,7 +56,7 @@ func (e *eth) avoidProviderTimeout() {
 	for {
 		_, err := e.Client.BlockNumber(context.Background())
 		if err != nil {
-			logger.Error("Disconnected: " + err.Error())
+			logger.Error("disconnected: ", logger.String("message", err.Error()))
 		}
 		time.Sleep(30 * time.Second)
 	}
@@ -67,7 +67,7 @@ func (e *eth) setContract() {
 	contractAddress := common.HexToAddress(conf.ContractAddress)
 	starNotary, err := starnotary.NewStarnotary(contractAddress, e.Client)
 	if err != nil {
-		logger.Panic("Could not instance go contract", logger.String("error", err.Error()))
+		logger.Panic("could not instance go contract", logger.String("message", err.Error()))
 	}
 
 	e.Contract = starNotary
@@ -76,7 +76,7 @@ func (e *eth) setContract() {
 func (e *eth) setABI() {
 	starnotaryABI, err := abi.JSON(strings.NewReader(string(starnotary.StarnotaryMetaData.ABI)))
 	if err != nil {
-		logger.Panic("Could not read contract ABI", logger.String("error", err.Error()))
+		logger.Panic("could not read contract ABI", logger.String("message", err.Error()))
 	}
 
 	e.ABI = &starnotaryABI

@@ -52,28 +52,28 @@ func Listen() {
 		case createdEvent := <-createdResChan:
 			genericCreated := createdToGeneric(*createdEvent)
 			insertEventByBlockNumber(genericCreated)
-			logger.Info("Created event to list", logger.Object("event", &genericCreated))
+			logger.Info("created event to list", logger.Object("event", &genericCreated))
 		case changedNameEvent := <-changedNameResChan:
 			genericChangedName := changedNameToGeneric(*changedNameEvent)
 			insertEventByBlockNumber(genericChangedName)
-			logger.Info("Changed name event to list", logger.Object("event", &genericChangedName))
+			logger.Info("changed name event to list", logger.Object("event", &genericChangedName))
 		case putForSaleEvent := <-putForSaleResChan:
 			genericPutForSale := putForSaleToGeneric(*putForSaleEvent)
 			insertEventByBlockNumber(genericPutForSale)
-			logger.Info("Put for sale event to list", logger.Object("event", &genericPutForSale))
+			logger.Info("put for sale event to list", logger.Object("event", &genericPutForSale))
 		case removedFromSaleEvent := <-removedFromSaleResChan:
 			genericRemovedFromSale := removedFromSaleToGeneric(*removedFromSaleEvent)
 			insertEventByBlockNumber(genericRemovedFromSale)
-			logger.Info("Removed from sale event to list", logger.Object("event", &genericRemovedFromSale))
+			logger.Info("removed from sale event to list", logger.Object("event", &genericRemovedFromSale))
 		case soldEvent := <-soldResChan:
 			genericSold := soldToGeneric(*soldEvent)
 			insertEventByBlockNumber(genericSold)
-			logger.Info("Sold event to list", logger.Object("event", &genericSold))
+			logger.Info("sold event to list", logger.Object("event", &genericSold))
 		default:
 			if len(unconfirmedEventsList) > 0 {
 				latestBlock, err := eth.Client.BlockNumber(context.Background())
 				if err != nil {
-					logger.Error("Could not update current block number", logger.String("error", err.Error()))
+					logger.Error("could not update current block number", logger.String("message", err.Error()))
 				}
 				latestBlockBig, _ := big.NewInt(0).SetString(strconv.FormatUint(latestBlock, 10), 10)
 				scrapAndConfirm(latestBlockBig)
@@ -98,7 +98,7 @@ func scrapAndConfirm(latestBlock *big.Int) {
 
 	logs, err := eth.Client.FilterLogs(context.Background(), query)
 	if err != nil {
-		logger.Error("Could not query contract logs", logger.String("error", err.Error()))
+		logger.Error("could not query contract logs", logger.String("message", err.Error()))
 	}
 
 	for _, scrappedEvent := range logs {
@@ -127,7 +127,7 @@ func scrapAndConfirm(latestBlock *big.Int) {
 		block, err := eth.Client.BlockByNumber(context.Background(), event.BlockNumber)
 		if err != nil {
 			/* if fail to get block, return to try again */
-			logger.Error("Failed to get block", logger.String("message", err.Error()))
+			logger.Error("failed to get block", logger.String("message", err.Error()))
 			return
 		}
 		event.Date = time.Unix(int64(block.Time()), 0).Format(time.RFC3339)
@@ -141,23 +141,23 @@ func consume(event domain.GenericEvent) {
 	switch event.EventType {
 	case "Created":
 		createdModel := genericToCreatedModel(event)
-		logger.Info("Consuming created event", logger.Object("event", &createdModel))
+		logger.Info("consuming created event", logger.Object("event", &createdModel))
 		api.CreateStar(createdModel)
 	case "ChangedName":
 		changedNameModel := genericToChangedNameModel(event)
-		logger.Info("Consuming changed name event", logger.Object("event", &changedNameModel))
+		logger.Info("consuming changed name event", logger.Object("event", &changedNameModel))
 		api.ChangeName(changedNameModel)
 	case "PutForSale":
 		putForSaleModel := genericToPutForSaleModel(event)
-		logger.Info("Consuming put for sale event", logger.Object("event", &putForSaleModel))
+		logger.Info("consuming put for sale event", logger.Object("event", &putForSaleModel))
 		api.PutForSale(putForSaleModel)
 	case "RemovedFromSale":
 		removedFromSaleModel := genericToRemovedFromSaleModel(event)
-		logger.Info("Consuming removed from sale event", logger.Object("event", &removedFromSaleModel))
+		logger.Info("consuming removed from sale event", logger.Object("event", &removedFromSaleModel))
 		api.RemoveFromSale(removedFromSaleModel)
 	case "Sold":
 		soldModel := genericToSoldModel(event)
-		logger.Info("Consuming sold event", logger.Object("event", &soldModel))
+		logger.Info("consuming sold event", logger.Object("event", &soldModel))
 		api.Sell(soldModel)
 	}
 }

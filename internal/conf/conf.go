@@ -45,7 +45,7 @@ func (c *conf) setup() {
 func (c *conf) setConfig() {
 	hocon, err := hocon.ParseResource("application.conf")
 	if err != nil {
-		log.Panic("error while parsing configuration file: ", err)
+		log.Panic("could not parse configuration file: ", err.Error())
 	}
 
 	log.Printf("configurations: %+v", *hocon)
@@ -56,7 +56,7 @@ func (c *conf) setConfig() {
 func (c *conf) setRPCProviderWebsocketURL() {
 	rpcProviderWebsocketURL := c.hocon.GetString("rpc-provider.websocket-url")
 	if len(rpcProviderWebsocketURL) == 0 {
-		log.Panic("Infura websocket URL environment variable not found")
+		log.Panic("infura websocket url environment variable not found")
 	}
 
 	c.RPCProviderWebsocketURL = rpcProviderWebsocketURL
@@ -65,7 +65,7 @@ func (c *conf) setRPCProviderWebsocketURL() {
 func (c *conf) setContractAddress() {
 	contractAddress := c.hocon.GetString("contract.address")
 	if len(contractAddress) == 0 {
-		log.Panic("Contract address environment variable not found")
+		log.Panic("contract address environment variable not found")
 	}
 
 	c.ContractAddress = contractAddress
@@ -74,12 +74,12 @@ func (c *conf) setContractAddress() {
 func (c *conf) setConfirmationBlocks() {
 	confirmationBlocksString := c.hocon.GetString("confirmation.blocks")
 	if len(confirmationBlocksString) == 0 {
-		log.Panic("Confirmed threshold environment variable not found")
+		log.Panic("confirmed threshold environment variable not found")
 	}
 
 	confirmationBlocks, err := strconv.ParseUint(confirmationBlocksString, 10, 64)
 	if err != nil {
-		log.Panicf("Could not convert confirmed threshold environment variable to uint: %+v\n", err)
+		log.Panic("could not convert confirmed threshold environment variable to uint: ", err.Error())
 	}
 
 	c.ConfirmationBlocks = confirmationBlocks
@@ -88,12 +88,12 @@ func (c *conf) setConfirmationBlocks() {
 func (c *conf) setConfirmationSleepSeconds() {
 	confirmationSleepSecondsString := c.hocon.GetString("confirmation.sleep-seconds")
 	if len(confirmationSleepSecondsString) == 0 {
-		log.Panic("Sleep interval seconds environment variable not found")
+		log.Panic("sleep interval seconds environment variable not found")
 	}
 
 	confirmationSleepSeconds, err := strconv.ParseUint(confirmationSleepSecondsString, 10, 64)
 	if err != nil {
-		log.Panicf("Could not convert sleep interval seconds environment variable to uint: %+v\n", err)
+		log.Panic("could not convert sleep interval seconds environment variable to uint: ", err.Error())
 	}
 
 	c.ConfirmationSleepSeconds = confirmationSleepSeconds
@@ -102,7 +102,7 @@ func (c *conf) setConfirmationSleepSeconds() {
 func (c *conf) setStarNotaryAPIHost() {
 	starNotaryAPIHost := c.hocon.GetString("star-notary-api.host")
 	if len(starNotaryAPIHost) == 0 {
-		log.Panic("Star notary api host environment variable not found")
+		log.Panic("star notary api host environment variable not found")
 	}
 
 	c.StarNotaryAPIHost = starNotaryAPIHost
@@ -111,7 +111,7 @@ func (c *conf) setStarNotaryAPIHost() {
 func (c *conf) setStarNotaryAPIPort() {
 	starNotaryAPIPort := c.hocon.GetString("star-notary-api.port")
 	if len(starNotaryAPIPort) == 0 {
-		log.Panic("Star notary api port environment variable not found")
+		log.Panic("star notary api port environment variable not found")
 	}
 
 	c.StarNotaryAPIPort = starNotaryAPIPort
