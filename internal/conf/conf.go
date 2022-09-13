@@ -118,5 +118,5 @@ func (c *conf) setBackendPort() {
 }
 
 func (c *conf) setLogPath() {
-	c.LogPath = c.hocon.GetString("log-path")
+	c.LogPath = c.hocon.GetString("log.path")
 }
