@@ -3,8 +3,6 @@ package backend
 import (
 	"bytes"
 	"encoding/json"
-	"io/ioutil"
-	"log"
 	"net/http"
 
 	"github.com/sergera/star-notary-listener/internal/conf"
@@ -30,18 +28,11 @@ func NewBackend() *Backend {
 }
 
 func (b Backend) Post(route string, jsonData []byte) error {
-	log.Println("host: ", b.host)
-	log.Println("port: ", b.port)
-	log.Println("route: ", route)
-	log.Println("full url: ", b.host+":"+b.port+"/"+route)
-
 	request, err := http.NewRequest("POST", b.host+":"+b.port+"/"+route, bytes.NewBuffer(jsonData))
 	if err != nil {
 		logger.Error(
 			"Failed to create post request",
 			logger.String("message", err.Error()),
-			logger.String("route", route),
-			logger.String("request", string(jsonData)),
 		)
 		return err
 	}
@@ -51,15 +42,10 @@ func (b Backend) Post(route string, jsonData []byte) error {
 	client := &http.Client{}
 	response, err := client.Do(request)
 	if err != nil {
-		responseBody, _ := ioutil.ReadAll(response.Body)
-		responseBodyString := string(responseBody)
 		logger.Error(
 			"Failed backend post request",
 			logger.String("message", err.Error()),
-			logger.String("route", route),
-			logger.String("request", string(jsonData)),
 			logger.String("status", response.Status),
-			logger.String("response", responseBodyString),
 		)
 		return err
 	}
@@ -74,8 +60,6 @@ func (b Backend) Put(route string, jsonData []byte) error {
 		logger.Error(
 			"Failed to create put request",
 			logger.String("message", err.Error()),
-			logger.String("route", route),
-			logger.String("request", string(jsonData)),
 		)
 		return err
 	}
@@ -85,15 +69,10 @@ func (b Backend) Put(route string, jsonData []byte) error {
 	client := &http.Client{}
 	response, err := client.Do(request)
 	if err != nil {
-		responseBody, _ := ioutil.ReadAll(response.Body)
-		responseBodyString := string(responseBody)
 		logger.Error(
 			"Failed backend put request",
 			logger.String("message", err.Error()),
-			logger.String("route", route),
-			logger.String("request", string(jsonData)),
 			logger.String("status", response.Status),
-			logger.String("response", responseBodyString),
 		)
 		return err
 	}
