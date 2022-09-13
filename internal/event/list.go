@@ -3,7 +3,6 @@ package event
 import (
 	"math/big"
 	"sort"
-	"time"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/sergera/star-notary-listener/internal/conf"
@@ -24,7 +23,7 @@ type genericEvent struct {
 	blockHash    string
 	logIndex     uint
 	removed      bool
-	date         time.Time
+	date         string
 	/* specific event fields */
 	coordinates  string
 	sender       string
@@ -48,7 +47,7 @@ func (e *genericEvent) MarshalLogObject(enc logger.ObjectEncoder) error {
 	enc.AddString("priceInEther", e.priceInEther.String())
 	enc.AddString("tokenId", e.tokenId)
 	enc.AddString("name", e.name)
-	enc.AddString("date", e.date.String())
+	enc.AddString("date", e.date)
 	return nil
 }
 

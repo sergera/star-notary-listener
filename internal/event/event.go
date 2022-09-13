@@ -129,7 +129,7 @@ func scrapAndConfirm(latestBlock *big.Int) {
 			logger.Error("Failed to get block", logger.String("message", err.Error()))
 			return
 		}
-		event.date = time.Unix(int64(block.Time()), 0)
+		event.date = time.Unix(int64(block.Time()), 0).Format(time.RFC3339)
 		consume(event)
 		removeEvents(event)
 	}
