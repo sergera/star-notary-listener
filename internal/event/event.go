@@ -11,6 +11,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/sergera/star-notary-listener/internal/backend"
 	"github.com/sergera/star-notary-listener/internal/conf"
+	"github.com/sergera/star-notary-listener/internal/domain"
 	"github.com/sergera/star-notary-listener/internal/eth"
 	"github.com/sergera/star-notary-listener/internal/gocontracts/starnotary"
 	"github.com/sergera/star-notary-listener/internal/logger"
@@ -88,7 +89,7 @@ func scrapAndConfirm(latestBlock *big.Int) {
 	eth := eth.GetEth()
 
 	query := ethereum.FilterQuery{
-		FromBlock: unconfirmedEventsList[0].blockNumber,
+		FromBlock: unconfirmedEventsList[0].BlockNumber,
 		ToBlock:   nil, /* nil will query to latest block */
 		Addresses: []common.Address{
 			common.HexToAddress(conf.ContractAddress),
@@ -107,12 +108,12 @@ func scrapAndConfirm(latestBlock *big.Int) {
 			continue
 		}
 		event := scrappedToGeneric(scrappedEvent)
-		if event.removed {
+		if event.Removed {
 			/* if event was removed, remove it from list */
 			removeEvents(event)
 			continue
 		}
-		if big.NewInt(0).Sub(latestBlock, event.blockNumber).Cmp(big.NewInt(int64(conf.ConfirmationBlocks))) == -1 {
+		if big.NewInt(0).Sub(latestBlock, event.BlockNumber).Cmp(big.NewInt(int64(conf.ConfirmationBlocks))) == -1 {
 			/* if latestBlock - eventBlockNumber < confirmationBlocks */
 			/* if event is not yet confirmed, ignore it */
 			continue
@@ -123,21 +124,21 @@ func scrapAndConfirm(latestBlock *big.Int) {
 			/* which would make the event be consumed again upon arrival */
 			continue
 		}
-		block, err := eth.Client.BlockByNumber(context.Background(), event.blockNumber)
+		block, err := eth.Client.BlockByNumber(context.Background(), event.BlockNumber)
 		if err != nil {
 			/* if fail to get block, return to try again */
 			logger.Error("Failed to get block", logger.String("message", err.Error()))
 			return
 		}
-		event.date = time.Unix(int64(block.Time()), 0).Format(time.RFC3339)
+		event.Date = time.Unix(int64(block.Time()), 0).Format(time.RFC3339)
 		consume(event)
 		removeEvents(event)
 	}
 }
 
-func consume(event genericEvent) {
+func consume(event domain.GenericEvent) {
 	var back *backend.Backend = backend.NewBackend()
-	switch event.eventType {
+	switch event.EventType {
 	case "Created":
 		createdModel := genericToCreatedModel(event)
 		logger.Info("Consuming created event", logger.Object("event", &createdModel))

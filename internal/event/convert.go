@@ -7,161 +7,161 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/sergera/star-notary-listener/internal/domain"
 	"github.com/sergera/star-notary-listener/internal/eth"
 	"github.com/sergera/star-notary-listener/internal/gocontracts/starnotary"
 	"github.com/sergera/star-notary-listener/internal/logger"
-	"github.com/sergera/star-notary-listener/internal/models"
 )
 
-func genericToCreatedModel(event genericEvent) models.CreatedEvent {
-	return models.CreatedEvent{
-		Owner:       event.sender,
-		Name:        event.name,
-		TokenId:     event.tokenId,
-		Coordinates: event.coordinates,
-		Date:        event.date,
+func genericToCreatedModel(event domain.GenericEvent) domain.CreatedEvent {
+	return domain.CreatedEvent{
+		Owner:       event.Sender,
+		Name:        event.Name,
+		TokenId:     event.TokenId,
+		Coordinates: event.Coordinates,
+		Date:        event.Date,
 	}
 }
 
-func genericToChangedNameModel(event genericEvent) models.ChangedNameEvent {
-	return models.ChangedNameEvent{
-		NewName: event.name,
-		TokenId: event.tokenId,
-		Date:    event.date,
+func genericToChangedNameModel(event domain.GenericEvent) domain.ChangedNameEvent {
+	return domain.ChangedNameEvent{
+		NewName: event.Name,
+		TokenId: event.TokenId,
+		Date:    event.Date,
 	}
 }
 
-func genericToPutForSaleModel(event genericEvent) models.PutForSaleEvent {
-	return models.PutForSaleEvent{
-		TokenId:      event.tokenId,
-		PriceInEther: strings.TrimRight(event.priceInEther.Text('f', 18), ".0"),
-		Date:         event.date,
+func genericToPutForSaleModel(event domain.GenericEvent) domain.PutForSaleEvent {
+	return domain.PutForSaleEvent{
+		TokenId:      event.TokenId,
+		PriceInEther: strings.TrimRight(event.PriceInEther.Text('f', 18), ".0"),
+		Date:         event.Date,
 	}
 }
 
-func genericToRemovedFromSaleModel(event genericEvent) models.RemovedFromSaleEvent {
-	return models.RemovedFromSaleEvent{
-		TokenId: event.tokenId,
-		Date:    event.date,
+func genericToRemovedFromSaleModel(event domain.GenericEvent) domain.RemovedFromSaleEvent {
+	return domain.RemovedFromSaleEvent{
+		TokenId: event.TokenId,
+		Date:    event.Date,
 	}
 }
 
-func genericToSoldModel(event genericEvent) models.SoldEvent {
-	return models.SoldEvent{
-		NewOwner: event.sender,
-		TokenId:  event.tokenId,
-		Date:     event.date,
+func genericToSoldModel(event domain.GenericEvent) domain.SoldEvent {
+	return domain.SoldEvent{
+		NewOwner: event.Sender,
+		TokenId:  event.TokenId,
+		Date:     event.Date,
 	}
 }
 
-func createdToGeneric(subscribedEvent starnotary.StarnotaryCreated) genericEvent {
+func createdToGeneric(subscribedEvent starnotary.StarnotaryCreated) domain.GenericEvent {
 	blockNumberBig, _ := big.NewInt(0).SetString(strconv.FormatUint(subscribedEvent.Raw.BlockNumber, 10), 10)
-	return genericEvent{
-		sender:       common.Address.Hex(subscribedEvent.Owner),
-		tokenId:      subscribedEvent.TokenId.Text(10),
-		coordinates:  string(subscribedEvent.Coordinates[:]),
-		name:         string(subscribedEvent.Name),
-		priceInEther: big.NewFloat(0),
-		eventType:    eventSignatureToType[subscribedEvent.Raw.Topics[0].Hex()],
+	return domain.GenericEvent{
+		Sender:       common.Address.Hex(subscribedEvent.Owner),
+		TokenId:      subscribedEvent.TokenId.Text(10),
+		Coordinates:  string(subscribedEvent.Coordinates[:]),
+		Name:         string(subscribedEvent.Name),
+		PriceInEther: big.NewFloat(0),
+		EventType:    eventSignatureToType[subscribedEvent.Raw.Topics[0].Hex()],
 
-		contractHash: subscribedEvent.Raw.Address.Hex(),
-		topics:       subscribedEvent.Raw.Topics,
-		data:         subscribedEvent.Raw.Data,
-		blockNumber:  blockNumberBig,
-		txHash:       subscribedEvent.Raw.TxHash.Hex(),
-		txIndex:      subscribedEvent.Raw.TxIndex,
-		blockHash:    subscribedEvent.Raw.BlockHash.Hex(),
-		logIndex:     subscribedEvent.Raw.Index,
-		removed:      subscribedEvent.Raw.Removed,
+		ContractHash: subscribedEvent.Raw.Address.Hex(),
+		Topics:       subscribedEvent.Raw.Topics,
+		Data:         subscribedEvent.Raw.Data,
+		BlockNumber:  blockNumberBig,
+		TxHash:       subscribedEvent.Raw.TxHash.Hex(),
+		TxIndex:      subscribedEvent.Raw.TxIndex,
+		BlockHash:    subscribedEvent.Raw.BlockHash.Hex(),
+		LogIndex:     subscribedEvent.Raw.Index,
+		Removed:      subscribedEvent.Raw.Removed,
 	}
 }
 
-func changedNameToGeneric(subscribedEvent starnotary.StarnotaryChangedName) genericEvent {
+func changedNameToGeneric(subscribedEvent starnotary.StarnotaryChangedName) domain.GenericEvent {
 	blockNumberBig, _ := big.NewInt(0).SetString(strconv.FormatUint(subscribedEvent.Raw.BlockNumber, 10), 10)
-	return genericEvent{
-		sender:       common.Address.Hex(subscribedEvent.Owner),
-		name:         string(subscribedEvent.NewName),
-		tokenId:      subscribedEvent.TokenId.Text(10),
-		priceInEther: big.NewFloat(0),
-		eventType:    eventSignatureToType[subscribedEvent.Raw.Topics[0].Hex()],
+	return domain.GenericEvent{
+		Sender:       common.Address.Hex(subscribedEvent.Owner),
+		Name:         string(subscribedEvent.NewName),
+		TokenId:      subscribedEvent.TokenId.Text(10),
+		PriceInEther: big.NewFloat(0),
+		EventType:    eventSignatureToType[subscribedEvent.Raw.Topics[0].Hex()],
 
-		contractHash: subscribedEvent.Raw.Address.Hex(),
-		topics:       subscribedEvent.Raw.Topics,
-		data:         subscribedEvent.Raw.Data,
-		blockNumber:  blockNumberBig,
-		txHash:       subscribedEvent.Raw.TxHash.Hex(),
-		txIndex:      subscribedEvent.Raw.TxIndex,
-		blockHash:    subscribedEvent.Raw.BlockHash.Hex(),
-		logIndex:     subscribedEvent.Raw.Index,
-		removed:      subscribedEvent.Raw.Removed,
+		ContractHash: subscribedEvent.Raw.Address.Hex(),
+		Topics:       subscribedEvent.Raw.Topics,
+		Data:         subscribedEvent.Raw.Data,
+		BlockNumber:  blockNumberBig,
+		TxHash:       subscribedEvent.Raw.TxHash.Hex(),
+		TxIndex:      subscribedEvent.Raw.TxIndex,
+		BlockHash:    subscribedEvent.Raw.BlockHash.Hex(),
+		LogIndex:     subscribedEvent.Raw.Index,
+		Removed:      subscribedEvent.Raw.Removed,
 	}
 }
 
-func putForSaleToGeneric(subscribedEvent starnotary.StarnotaryPutForSale) genericEvent {
+func putForSaleToGeneric(subscribedEvent starnotary.StarnotaryPutForSale) domain.GenericEvent {
 	blockNumberBig, _ := big.NewInt(0).SetString(strconv.FormatUint(subscribedEvent.Raw.BlockNumber, 10), 10)
-	return genericEvent{
-		sender:       common.Address.Hex(subscribedEvent.Owner),
-		tokenId:      subscribedEvent.TokenId.Text(10),
-		priceInEther: eth.WeiToEther(subscribedEvent.PriceInWei),
-		eventType:    eventSignatureToType[subscribedEvent.Raw.Topics[0].Hex()],
+	return domain.GenericEvent{
+		Sender:       common.Address.Hex(subscribedEvent.Owner),
+		TokenId:      subscribedEvent.TokenId.Text(10),
+		PriceInEther: eth.WeiToEther(subscribedEvent.PriceInWei),
+		EventType:    eventSignatureToType[subscribedEvent.Raw.Topics[0].Hex()],
 
-		contractHash: subscribedEvent.Raw.Address.Hex(),
-		topics:       subscribedEvent.Raw.Topics,
-		data:         subscribedEvent.Raw.Data,
-		blockNumber:  blockNumberBig,
-		txHash:       subscribedEvent.Raw.TxHash.Hex(),
-		txIndex:      subscribedEvent.Raw.TxIndex,
-		blockHash:    subscribedEvent.Raw.BlockHash.Hex(),
-		logIndex:     subscribedEvent.Raw.Index,
-		removed:      subscribedEvent.Raw.Removed,
+		ContractHash: subscribedEvent.Raw.Address.Hex(),
+		Topics:       subscribedEvent.Raw.Topics,
+		Data:         subscribedEvent.Raw.Data,
+		BlockNumber:  blockNumberBig,
+		TxHash:       subscribedEvent.Raw.TxHash.Hex(),
+		TxIndex:      subscribedEvent.Raw.TxIndex,
+		BlockHash:    subscribedEvent.Raw.BlockHash.Hex(),
+		LogIndex:     subscribedEvent.Raw.Index,
+		Removed:      subscribedEvent.Raw.Removed,
 	}
 }
 
-func removedFromSaleToGeneric(subscribedEvent starnotary.StarnotaryRemovedFromSale) genericEvent {
+func removedFromSaleToGeneric(subscribedEvent starnotary.StarnotaryRemovedFromSale) domain.GenericEvent {
 	blockNumberBig, _ := big.NewInt(0).SetString(strconv.FormatUint(subscribedEvent.Raw.BlockNumber, 10), 10)
-	return genericEvent{
-		sender:       common.Address.Hex(subscribedEvent.Owner),
-		tokenId:      subscribedEvent.TokenId.Text(10),
-		priceInEther: big.NewFloat(0),
-		eventType:    eventSignatureToType[subscribedEvent.Raw.Topics[0].Hex()],
+	return domain.GenericEvent{
+		Sender:       common.Address.Hex(subscribedEvent.Owner),
+		TokenId:      subscribedEvent.TokenId.Text(10),
+		PriceInEther: big.NewFloat(0),
+		EventType:    eventSignatureToType[subscribedEvent.Raw.Topics[0].Hex()],
 
-		contractHash: subscribedEvent.Raw.Address.Hex(),
-		topics:       subscribedEvent.Raw.Topics,
-		data:         subscribedEvent.Raw.Data,
-		blockNumber:  blockNumberBig,
-		txHash:       subscribedEvent.Raw.TxHash.Hex(),
-		txIndex:      subscribedEvent.Raw.TxIndex,
-		blockHash:    subscribedEvent.Raw.BlockHash.Hex(),
-		logIndex:     subscribedEvent.Raw.Index,
-		removed:      subscribedEvent.Raw.Removed,
+		ContractHash: subscribedEvent.Raw.Address.Hex(),
+		Topics:       subscribedEvent.Raw.Topics,
+		Data:         subscribedEvent.Raw.Data,
+		BlockNumber:  blockNumberBig,
+		TxHash:       subscribedEvent.Raw.TxHash.Hex(),
+		TxIndex:      subscribedEvent.Raw.TxIndex,
+		BlockHash:    subscribedEvent.Raw.BlockHash.Hex(),
+		LogIndex:     subscribedEvent.Raw.Index,
+		Removed:      subscribedEvent.Raw.Removed,
 	}
 }
 
-func soldToGeneric(subscribedEvent starnotary.StarnotarySold) genericEvent {
+func soldToGeneric(subscribedEvent starnotary.StarnotarySold) domain.GenericEvent {
 	blockNumberBig, _ := big.NewInt(0).SetString(strconv.FormatUint(subscribedEvent.Raw.BlockNumber, 10), 10)
-	return genericEvent{
-		sender:       common.Address.Hex(subscribedEvent.NewOwner),
-		tokenId:      subscribedEvent.TokenId.Text(10),
-		priceInEther: big.NewFloat(0),
-		eventType:    eventSignatureToType[subscribedEvent.Raw.Topics[0].Hex()],
+	return domain.GenericEvent{
+		Sender:       common.Address.Hex(subscribedEvent.NewOwner),
+		TokenId:      subscribedEvent.TokenId.Text(10),
+		PriceInEther: big.NewFloat(0),
+		EventType:    eventSignatureToType[subscribedEvent.Raw.Topics[0].Hex()],
 
-		contractHash: subscribedEvent.Raw.Address.Hex(),
-		topics:       subscribedEvent.Raw.Topics,
-		data:         subscribedEvent.Raw.Data,
-		blockNumber:  blockNumberBig,
-		txHash:       subscribedEvent.Raw.TxHash.Hex(),
-		txIndex:      subscribedEvent.Raw.TxIndex,
-		blockHash:    subscribedEvent.Raw.BlockHash.Hex(),
-		logIndex:     subscribedEvent.Raw.Index,
-		removed:      subscribedEvent.Raw.Removed,
+		ContractHash: subscribedEvent.Raw.Address.Hex(),
+		Topics:       subscribedEvent.Raw.Topics,
+		Data:         subscribedEvent.Raw.Data,
+		BlockNumber:  blockNumberBig,
+		TxHash:       subscribedEvent.Raw.TxHash.Hex(),
+		TxIndex:      subscribedEvent.Raw.TxIndex,
+		BlockHash:    subscribedEvent.Raw.BlockHash.Hex(),
+		LogIndex:     subscribedEvent.Raw.Index,
+		Removed:      subscribedEvent.Raw.Removed,
 	}
 }
 
-func scrappedToGeneric(logEvent types.Log) (event genericEvent) {
+func scrappedToGeneric(logEvent types.Log) (event domain.GenericEvent) {
 	eventSignature := logEvent.Topics[0].Hex()
-	eventType := eventSignatureToType[eventSignature]
+	EventType := eventSignatureToType[eventSignature]
 
-	switch eventType {
+	switch EventType {
 	case "Created":
 		event = scrappedCreatedToGeneric(logEvent)
 	case "ChangedName":
@@ -179,7 +179,7 @@ func scrappedToGeneric(logEvent types.Log) (event genericEvent) {
 	return
 }
 
-func scrappedCreatedToGeneric(logEvent types.Log) genericEvent {
+func scrappedCreatedToGeneric(logEvent types.Log) domain.GenericEvent {
 	eth := eth.GetEth()
 	parsedCreated, err := eth.Contract.ParseCreated(logEvent)
 	if err != nil {
@@ -188,16 +188,16 @@ func scrappedCreatedToGeneric(logEvent types.Log) genericEvent {
 	return createdToGeneric(*parsedCreated)
 }
 
-func scrappedChangedNameToGeneric(logEvent types.Log) genericEvent {
+func scrappedChangedNameToGeneric(logEvent types.Log) domain.GenericEvent {
 	eth := eth.GetEth()
 	parsedChangedName, err := eth.Contract.ParseChangedName(logEvent)
 	if err != nil {
-		logger.Error("Could not parse scrapped changed name event", logger.String("error", err.Error()))
+		logger.Error("Could not parse scrapped changed Name event", logger.String("error", err.Error()))
 	}
 	return changedNameToGeneric(*parsedChangedName)
 }
 
-func scrappedPutForSaleToGeneric(logEvent types.Log) genericEvent {
+func scrappedPutForSaleToGeneric(logEvent types.Log) domain.GenericEvent {
 	eth := eth.GetEth()
 	parsedPutForSale, err := eth.Contract.ParsePutForSale(logEvent)
 	if err != nil {
@@ -206,16 +206,16 @@ func scrappedPutForSaleToGeneric(logEvent types.Log) genericEvent {
 	return putForSaleToGeneric(*parsedPutForSale)
 }
 
-func scrappedRemovedFromSaleToGeneric(logEvent types.Log) genericEvent {
+func scrappedRemovedFromSaleToGeneric(logEvent types.Log) domain.GenericEvent {
 	eth := eth.GetEth()
 	parsedRemovedFromSale, err := eth.Contract.ParseRemovedFromSale(logEvent)
 	if err != nil {
-		logger.Error("Could not parse scrapped removed from sale event", logger.String("error", err.Error()))
+		logger.Error("Could not parse scrapped Removed from sale event", logger.String("error", err.Error()))
 	}
 	return removedFromSaleToGeneric(*parsedRemovedFromSale)
 }
 
-func scrappedSoldToGeneric(logEvent types.Log) genericEvent {
+func scrappedSoldToGeneric(logEvent types.Log) domain.GenericEvent {
 	eth := eth.GetEth()
 	parsedSold, err := eth.Contract.ParseSold(logEvent)
 	if err != nil {

@@ -6,8 +6,8 @@ import (
 	"net/http"
 
 	"github.com/sergera/star-notary-listener/internal/conf"
+	"github.com/sergera/star-notary-listener/internal/domain"
 	"github.com/sergera/star-notary-listener/internal/logger"
-	"github.com/sergera/star-notary-listener/internal/models"
 )
 
 type Backend struct {
@@ -81,7 +81,7 @@ func (b Backend) Put(route string, jsonData []byte) error {
 	return nil
 }
 
-func (b Backend) CreateStar(e models.CreatedEvent) error {
+func (b Backend) CreateStar(e domain.CreatedEvent) error {
 	m, err := json.Marshal(e)
 	if err != nil {
 		logger.Error(
@@ -100,7 +100,7 @@ func (b Backend) CreateStar(e models.CreatedEvent) error {
 	return nil
 }
 
-func (b Backend) ChangeName(e models.ChangedNameEvent) error {
+func (b Backend) ChangeName(e domain.ChangedNameEvent) error {
 	m, err := json.Marshal(e)
 	if err != nil {
 		logger.Error(
@@ -119,7 +119,7 @@ func (b Backend) ChangeName(e models.ChangedNameEvent) error {
 	return nil
 }
 
-func (b Backend) PutForSale(e models.PutForSaleEvent) error {
+func (b Backend) PutForSale(e domain.PutForSaleEvent) error {
 	m, err := json.Marshal(e)
 	if err != nil {
 		logger.Error(
@@ -138,7 +138,7 @@ func (b Backend) PutForSale(e models.PutForSaleEvent) error {
 	return nil
 }
 
-func (b Backend) RemoveFromSale(e models.RemovedFromSaleEvent) error {
+func (b Backend) RemoveFromSale(e domain.RemovedFromSaleEvent) error {
 	m, err := json.Marshal(e)
 	if err != nil {
 		logger.Error(
@@ -157,7 +157,7 @@ func (b Backend) RemoveFromSale(e models.RemovedFromSaleEvent) error {
 	return nil
 }
 
-func (b Backend) Sell(e models.SoldEvent) error {
+func (b Backend) Sell(e domain.SoldEvent) error {
 	m, err := json.Marshal(e)
 	if err != nil {
 		logger.Error(
