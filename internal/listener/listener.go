@@ -1,4 +1,4 @@
-package event
+package listener
 
 import (
 	"context"
@@ -26,10 +26,26 @@ var eventSignatureToType = map[string]string{
 	"0xae92ab4b6f8f401ead768d3273e6bb937a13e39827d19c6376e8fd4512a05d9a": "Sold",
 }
 
-func Listen() {
-	q := queue.NewEventQueue()
+type Listener struct {
+	queue           *queue.EventQueue
+	api             *service.StarNotaryAPIService
+	contractAddress string
+	confirmDelay    uint64
+	confirmBlocks   uint64
+}
 
+func NewListener() *Listener {
 	conf := conf.GetConf()
+	return &Listener{
+		queue:           queue.NewEventQueue(),
+		api:             service.NewStarNotaryAPIService(),
+		contractAddress: conf.ContractAddress(),
+		confirmDelay:    conf.ConfirmationSleepSeconds(),
+		confirmBlocks:   conf.ConfirmationBlocks(),
+	}
+}
+
+func (l *Listener) Listen() {
 	eth := eth.GetEth()
 
 	createdResChan := make(chan *starnotary.StarnotaryCreated)
@@ -54,48 +70,47 @@ func Listen() {
 		select {
 		case createdEvent := <-createdResChan:
 			genericCreated := createdToGeneric(*createdEvent)
-			q.InsertEventByBlockNumber(genericCreated)
+			l.queue.InsertEventByBlockNumber(genericCreated)
 			logger.Info("created event to list", logger.Object("event", &genericCreated))
 		case changedNameEvent := <-changedNameResChan:
 			genericChangedName := changedNameToGeneric(*changedNameEvent)
-			q.InsertEventByBlockNumber(genericChangedName)
+			l.queue.InsertEventByBlockNumber(genericChangedName)
 			logger.Info("changed name event to list", logger.Object("event", &genericChangedName))
 		case putForSaleEvent := <-putForSaleResChan:
 			genericPutForSale := putForSaleToGeneric(*putForSaleEvent)
-			q.InsertEventByBlockNumber(genericPutForSale)
+			l.queue.InsertEventByBlockNumber(genericPutForSale)
 			logger.Info("put for sale event to list", logger.Object("event", &genericPutForSale))
 		case removedFromSaleEvent := <-removedFromSaleResChan:
 			genericRemovedFromSale := removedFromSaleToGeneric(*removedFromSaleEvent)
-			q.InsertEventByBlockNumber(genericRemovedFromSale)
+			l.queue.InsertEventByBlockNumber(genericRemovedFromSale)
 			logger.Info("removed from sale event to list", logger.Object("event", &genericRemovedFromSale))
 		case soldEvent := <-soldResChan:
 			genericSold := soldToGeneric(*soldEvent)
-			q.InsertEventByBlockNumber(genericSold)
+			l.queue.InsertEventByBlockNumber(genericSold)
 			logger.Info("sold event to list", logger.Object("event", &genericSold))
 		default:
-			if q.Length() > 0 {
+			if l.queue.Length() > 0 {
 				latestBlock, err := eth.Client.BlockNumber(context.Background())
 				if err != nil {
 					logger.Error("could not update current block number", logger.String("message", err.Error()))
 				}
 				latestBlockBig, _ := big.NewInt(0).SetString(strconv.FormatUint(latestBlock, 10), 10)
-				scrapAndConfirm(latestBlockBig, q)
-				q.RemoveLeftoverEvents(latestBlockBig)
-				time.Sleep(time.Duration(conf.ConfirmationSleepSeconds()) * time.Second)
+				l.scrapAndConfirm(latestBlockBig)
+				l.queue.RemoveLeftoverEvents(latestBlockBig)
+				time.Sleep(time.Duration(l.confirmDelay) * time.Second)
 			}
 		}
 	}
 }
 
-func scrapAndConfirm(latestBlock *big.Int, q *queue.EventQueue) {
-	conf := conf.GetConf()
+func (l *Listener) scrapAndConfirm(latestBlock *big.Int) {
 	eth := eth.GetEth()
 
 	query := ethereum.FilterQuery{
-		FromBlock: q.FirstEventBlockNumber(),
+		FromBlock: l.queue.FirstEventBlockNumber(),
 		ToBlock:   nil, /* nil will query to latest block */
 		Addresses: []common.Address{
-			common.HexToAddress(conf.ContractAddress()),
+			common.HexToAddress(l.contractAddress),
 		},
 	}
 
@@ -113,15 +128,15 @@ func scrapAndConfirm(latestBlock *big.Int, q *queue.EventQueue) {
 		event := scrappedToGeneric(scrappedEvent)
 		if event.Removed {
 			/* if event was removed, remove it and duplicates from list */
-			q.RemoveEventsLike(event)
+			l.queue.RemoveEventsLike(event)
 			continue
 		}
-		if big.NewInt(0).Sub(latestBlock, event.BlockNumber).Cmp(big.NewInt(int64(conf.ConfirmationBlocks()))) == -1 {
+		if big.NewInt(0).Sub(latestBlock, event.BlockNumber).Cmp(new(big.Int).SetUint64(l.confirmBlocks)) == -1 {
 			/* if latestBlock - eventBlockNumber < confirmationBlocks */
 			/* if event is not yet confirmed, ignore it */
 			continue
 		}
-		if !q.IsEventInList(event) {
+		if !l.queue.IsEventInList(event) {
 			/* if event is not in list, ignore it */
 			/* subscribed events might arrive after being added to logs */
 			/* which would make the event be consumed again upon arrival */
@@ -134,33 +149,32 @@ func scrapAndConfirm(latestBlock *big.Int, q *queue.EventQueue) {
 			return
 		}
 		event.Date = time.Unix(int64(block.Time()), 0).Format(time.RFC3339)
-		consume(event)
-		q.RemoveEventsLike(event)
+		l.consume(event)
+		l.queue.RemoveEventsLike(event)
 	}
 }
 
-func consume(generic domain.GenericEvent) {
-	var api *service.StarNotaryAPIService = service.NewStarNotaryAPIService()
+func (l *Listener) consume(generic domain.GenericEvent) {
 	switch generic.EventType {
 	case "Created":
 		createdModel := generic.ToCreatedEvent()
 		logger.Info("consuming created event", logger.Object("event", &createdModel))
-		api.CreateStar(createdModel)
+		l.api.CreateStar(createdModel)
 	case "ChangedName":
 		changedNameModel := generic.ToChangedNameEvent()
 		logger.Info("consuming changed name event", logger.Object("event", &changedNameModel))
-		api.ChangeName(changedNameModel)
+		l.api.ChangeName(changedNameModel)
 	case "PutForSale":
 		putForSaleModel := generic.ToPutForSaleEvent()
 		logger.Info("consuming put for sale event", logger.Object("event", &putForSaleModel))
-		api.PutForSale(putForSaleModel)
+		l.api.PutForSale(putForSaleModel)
 	case "RemovedFromSale":
 		removedFromSaleModel := generic.ToRemovedFromSaleEvent()
 		logger.Info("consuming removed from sale event", logger.Object("event", &removedFromSaleModel))
-		api.RemoveFromSale(removedFromSaleModel)
+		l.api.RemoveFromSale(removedFromSaleModel)
 	case "Sold":
 		soldModel := generic.ToSoldEvent()
 		logger.Info("consuming sold event", logger.Object("event", &soldModel))
-		api.Sell(soldModel)
+		l.api.Sell(soldModel)
 	}
 }
