@@ -3,7 +3,6 @@ package event
 import (
 	"math/big"
 	"strconv"
-	"strings"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
@@ -12,47 +11,6 @@ import (
 	"github.com/sergera/star-notary-listener/internal/gocontracts/starnotary"
 	"github.com/sergera/star-notary-listener/internal/logger"
 )
-
-func genericToCreatedModel(event domain.GenericEvent) domain.CreatedEvent {
-	return domain.CreatedEvent{
-		Owner:       event.Sender,
-		Name:        event.Name,
-		TokenId:     event.TokenId,
-		Coordinates: event.Coordinates,
-		Date:        event.Date,
-	}
-}
-
-func genericToChangedNameModel(event domain.GenericEvent) domain.ChangedNameEvent {
-	return domain.ChangedNameEvent{
-		NewName: event.Name,
-		TokenId: event.TokenId,
-		Date:    event.Date,
-	}
-}
-
-func genericToPutForSaleModel(event domain.GenericEvent) domain.PutForSaleEvent {
-	return domain.PutForSaleEvent{
-		TokenId:      event.TokenId,
-		PriceInEther: strings.TrimRight(event.PriceInEther.Text('f', 18), ".0"),
-		Date:         event.Date,
-	}
-}
-
-func genericToRemovedFromSaleModel(event domain.GenericEvent) domain.RemovedFromSaleEvent {
-	return domain.RemovedFromSaleEvent{
-		TokenId: event.TokenId,
-		Date:    event.Date,
-	}
-}
-
-func genericToSoldModel(event domain.GenericEvent) domain.SoldEvent {
-	return domain.SoldEvent{
-		NewOwner: event.Sender,
-		TokenId:  event.TokenId,
-		Date:     event.Date,
-	}
-}
 
 func createdToGeneric(subscribedEvent starnotary.StarnotaryCreated) domain.GenericEvent {
 	blockNumberBig, _ := big.NewInt(0).SetString(strconv.FormatUint(subscribedEvent.Raw.BlockNumber, 10), 10)

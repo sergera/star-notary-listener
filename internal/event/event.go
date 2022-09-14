@@ -139,27 +139,27 @@ func scrapAndConfirm(latestBlock *big.Int, q *queue.EventQueue) {
 	}
 }
 
-func consume(event domain.GenericEvent) {
+func consume(generic domain.GenericEvent) {
 	var api *service.StarNotaryAPIService = service.NewStarNotaryAPIService()
-	switch event.EventType {
+	switch generic.EventType {
 	case "Created":
-		createdModel := genericToCreatedModel(event)
+		createdModel := generic.ToCreatedEvent()
 		logger.Info("consuming created event", logger.Object("event", &createdModel))
 		api.CreateStar(createdModel)
 	case "ChangedName":
-		changedNameModel := genericToChangedNameModel(event)
+		changedNameModel := generic.ToChangedNameEvent()
 		logger.Info("consuming changed name event", logger.Object("event", &changedNameModel))
 		api.ChangeName(changedNameModel)
 	case "PutForSale":
-		putForSaleModel := genericToPutForSaleModel(event)
+		putForSaleModel := generic.ToPutForSaleEvent()
 		logger.Info("consuming put for sale event", logger.Object("event", &putForSaleModel))
 		api.PutForSale(putForSaleModel)
 	case "RemovedFromSale":
-		removedFromSaleModel := genericToRemovedFromSaleModel(event)
+		removedFromSaleModel := generic.ToRemovedFromSaleEvent()
 		logger.Info("consuming removed from sale event", logger.Object("event", &removedFromSaleModel))
 		api.RemoveFromSale(removedFromSaleModel)
 	case "Sold":
-		soldModel := genericToSoldModel(event)
+		soldModel := generic.ToSoldEvent()
 		logger.Info("consuming sold event", logger.Object("event", &soldModel))
 		api.Sell(soldModel)
 	}

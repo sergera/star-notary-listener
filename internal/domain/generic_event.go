@@ -3,6 +3,7 @@ package domain
 import (
 	"bytes"
 	"math/big"
+	"strings"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/sergera/star-notary-listener/internal/logger"
@@ -65,4 +66,45 @@ func (e *GenericEvent) IsDuplicate(duplicate *GenericEvent) bool {
 		return false
 	}
 	return true
+}
+
+func (g *GenericEvent) ToCreatedEvent() CreatedEvent {
+	return CreatedEvent{
+		Owner:       g.Sender,
+		Name:        g.Name,
+		TokenId:     g.TokenId,
+		Coordinates: g.Coordinates,
+		Date:        g.Date,
+	}
+}
+
+func (g *GenericEvent) ToChangedNameEvent() ChangedNameEvent {
+	return ChangedNameEvent{
+		NewName: g.Name,
+		TokenId: g.TokenId,
+		Date:    g.Date,
+	}
+}
+
+func (g *GenericEvent) ToPutForSaleEvent() PutForSaleEvent {
+	return PutForSaleEvent{
+		TokenId:      g.TokenId,
+		PriceInEther: strings.TrimRight(g.PriceInEther.Text('f', 18), ".0"),
+		Date:         g.Date,
+	}
+}
+
+func (g *GenericEvent) ToRemovedFromSaleEvent() RemovedFromSaleEvent {
+	return RemovedFromSaleEvent{
+		TokenId: g.TokenId,
+		Date:    g.Date,
+	}
+}
+
+func (g *GenericEvent) ToSoldEvent() SoldEvent {
+	return SoldEvent{
+		NewOwner: g.Sender,
+		TokenId:  g.TokenId,
+		Date:     g.Date,
+	}
 }
