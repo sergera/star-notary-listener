@@ -12,14 +12,17 @@ import (
 )
 
 type EventQueue struct {
-	queue []domain.GenericEvent
-	lock  *sync.Mutex
+	lock          *sync.Mutex
+	queue         []domain.GenericEvent
+	confirmBlocks *big.Int
 }
 
 func NewEventQueue() *EventQueue {
+	conf := conf.GetConf()
 	return &EventQueue{
-		queue: []domain.GenericEvent{},
-		lock:  &sync.Mutex{},
+		lock:          &sync.Mutex{},
+		queue:         []domain.GenericEvent{},
+		confirmBlocks: new(big.Int).SetUint64(conf.ConfirmationBlocks()),
 	}
 }
 
@@ -63,16 +66,15 @@ func (q *EventQueue) RemoveEventsLike(event domain.GenericEvent) {
 }
 
 func (q *EventQueue) RemoveLeftoverEvents(latestBlock *big.Int) {
-	conf := conf.GetConf()
 	q.lock.Lock()
 	defer q.lock.Unlock()
 	q.queue = slc.Filter(q.queue, func(orphan domain.GenericEvent) bool {
-		if big.NewInt(0).Sub(latestBlock, orphan.BlockNumber).Cmp(big.NewInt(int64(conf.ConfirmationBlocks()))) == 1 {
+		if big.NewInt(0).Sub(latestBlock, orphan.BlockNumber).Cmp(q.confirmBlocks) == 1 {
 			/* if latestBlock - orphanBlockNumber > confirmationBlocks */
 			logger.Info("removing leftover event", logger.Object("event", &orphan))
 		}
 		/* return latestBlock - orphanBlockNumber <= confirmationBlocks */
-		return big.NewInt(0).Sub(latestBlock, orphan.BlockNumber).Cmp(big.NewInt(int64(conf.ConfirmationBlocks()))) != 1
+		return big.NewInt(0).Sub(latestBlock, orphan.BlockNumber).Cmp(q.confirmBlocks) != 1
 	})
 }
 
