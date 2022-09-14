@@ -81,7 +81,7 @@ func Listen() {
 				latestBlockBig, _ := big.NewInt(0).SetString(strconv.FormatUint(latestBlock, 10), 10)
 				scrapAndConfirm(latestBlockBig, q)
 				q.RemoveLeftoverEvents(latestBlockBig)
-				time.Sleep(time.Duration(conf.ConfirmationSleepSeconds) * time.Second)
+				time.Sleep(time.Duration(conf.ConfirmationSleepSeconds()) * time.Second)
 			}
 		}
 	}
@@ -95,7 +95,7 @@ func scrapAndConfirm(latestBlock *big.Int, q *queue.EventQueue) {
 		FromBlock: q.FirstEventBlockNumber(),
 		ToBlock:   nil, /* nil will query to latest block */
 		Addresses: []common.Address{
-			common.HexToAddress(conf.ContractAddress),
+			common.HexToAddress(conf.ContractAddress()),
 		},
 	}
 
@@ -116,7 +116,7 @@ func scrapAndConfirm(latestBlock *big.Int, q *queue.EventQueue) {
 			q.RemoveEventsLike(event)
 			continue
 		}
-		if big.NewInt(0).Sub(latestBlock, event.BlockNumber).Cmp(big.NewInt(int64(conf.ConfirmationBlocks))) == -1 {
+		if big.NewInt(0).Sub(latestBlock, event.BlockNumber).Cmp(big.NewInt(int64(conf.ConfirmationBlocks()))) == -1 {
 			/* if latestBlock - eventBlockNumber < confirmationBlocks */
 			/* if event is not yet confirmed, ignore it */
 			continue

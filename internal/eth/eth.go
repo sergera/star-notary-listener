@@ -44,7 +44,7 @@ func (e *eth) setup() {
 
 func (e *eth) setClient() {
 	conf := conf.GetConf()
-	client, err := ethclient.Dial(conf.RPCProviderWebsocketURL)
+	client, err := ethclient.Dial(conf.RPCProviderWebsocketURL())
 	if err != nil {
 		logger.Panic("could not dial eth client", logger.String("message", err.Error()))
 	}
@@ -64,7 +64,7 @@ func (e *eth) avoidProviderTimeout() {
 
 func (e *eth) setContract() {
 	conf := conf.GetConf()
-	contractAddress := common.HexToAddress(conf.ContractAddress)
+	contractAddress := common.HexToAddress(conf.ContractAddress())
 	starNotary, err := starnotary.NewStarnotary(contractAddress, e.Client)
 	if err != nil {
 		logger.Panic("could not instance go contract", logger.String("message", err.Error()))

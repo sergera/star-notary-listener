@@ -20,8 +20,8 @@ type StarNotaryAPIService struct {
 func NewStarNotaryAPIService() *StarNotaryAPIService {
 	conf := conf.GetConf()
 	return &StarNotaryAPIService{
-		conf.StarNotaryAPIHost,
-		conf.StarNotaryAPIPort,
+		conf.StarNotaryAPIHost(),
+		conf.StarNotaryAPIPort(),
 		"application/json; charset=UTF-8",
 		&http.Client{},
 	}

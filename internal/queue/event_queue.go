@@ -67,12 +67,12 @@ func (q *EventQueue) RemoveLeftoverEvents(latestBlock *big.Int) {
 	q.lock.Lock()
 	defer q.lock.Unlock()
 	q.queue = slc.Filter(q.queue, func(orphan domain.GenericEvent) bool {
-		if big.NewInt(0).Sub(latestBlock, orphan.BlockNumber).Cmp(big.NewInt(int64(conf.ConfirmationBlocks))) == 1 {
+		if big.NewInt(0).Sub(latestBlock, orphan.BlockNumber).Cmp(big.NewInt(int64(conf.ConfirmationBlocks()))) == 1 {
 			/* if latestBlock - orphanBlockNumber > confirmationBlocks */
 			logger.Info("removing leftover event", logger.Object("event", &orphan))
 		}
 		/* return latestBlock - orphanBlockNumber <= confirmationBlocks */
-		return big.NewInt(0).Sub(latestBlock, orphan.BlockNumber).Cmp(big.NewInt(int64(conf.ConfirmationBlocks))) != 1
+		return big.NewInt(0).Sub(latestBlock, orphan.BlockNumber).Cmp(big.NewInt(int64(conf.ConfirmationBlocks()))) != 1
 	})
 }
 

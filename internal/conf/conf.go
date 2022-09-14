@@ -13,13 +13,13 @@ var instance *conf
 
 type conf struct {
 	hocon                    *hocon.Config
-	RPCProviderWebsocketURL  string
-	ContractAddress          string
-	ConfirmationBlocks       uint64
-	ConfirmationSleepSeconds uint64
-	StarNotaryAPIHost        string
-	StarNotaryAPIPort        string
-	LogPath                  string
+	rpcProviderWebsocketURL  string
+	contractAddress          string
+	confirmationBlocks       uint64
+	confirmationSleepSeconds uint64
+	starNotaryAPIHost        string
+	starNotaryAPIPort        string
+	logPath                  string
 }
 
 func GetConf() *conf {
@@ -59,7 +59,11 @@ func (c *conf) setRPCProviderWebsocketURL() {
 		log.Panic("infura websocket url environment variable not found")
 	}
 
-	c.RPCProviderWebsocketURL = rpcProviderWebsocketURL
+	c.rpcProviderWebsocketURL = rpcProviderWebsocketURL
+}
+
+func (c *conf) RPCProviderWebsocketURL() string {
+	return c.rpcProviderWebsocketURL
 }
 
 func (c *conf) setContractAddress() {
@@ -68,7 +72,11 @@ func (c *conf) setContractAddress() {
 		log.Panic("contract address environment variable not found")
 	}
 
-	c.ContractAddress = contractAddress
+	c.contractAddress = contractAddress
+}
+
+func (c *conf) ContractAddress() string {
+	return c.contractAddress
 }
 
 func (c *conf) setConfirmationBlocks() {
@@ -82,7 +90,11 @@ func (c *conf) setConfirmationBlocks() {
 		log.Panic("could not convert confirmed threshold environment variable to uint: ", err.Error())
 	}
 
-	c.ConfirmationBlocks = confirmationBlocks
+	c.confirmationBlocks = confirmationBlocks
+}
+
+func (c *conf) ConfirmationBlocks() uint64 {
+	return c.confirmationBlocks
 }
 
 func (c *conf) setConfirmationSleepSeconds() {
@@ -96,7 +108,11 @@ func (c *conf) setConfirmationSleepSeconds() {
 		log.Panic("could not convert sleep interval seconds environment variable to uint: ", err.Error())
 	}
 
-	c.ConfirmationSleepSeconds = confirmationSleepSeconds
+	c.confirmationSleepSeconds = confirmationSleepSeconds
+}
+
+func (c *conf) ConfirmationSleepSeconds() uint64 {
+	return c.confirmationSleepSeconds
 }
 
 func (c *conf) setStarNotaryAPIHost() {
@@ -105,7 +121,11 @@ func (c *conf) setStarNotaryAPIHost() {
 		log.Panic("star notary api host environment variable not found")
 	}
 
-	c.StarNotaryAPIHost = starNotaryAPIHost
+	c.starNotaryAPIHost = starNotaryAPIHost
+}
+
+func (c *conf) StarNotaryAPIHost() string {
+	return c.starNotaryAPIHost
 }
 
 func (c *conf) setStarNotaryAPIPort() {
@@ -114,9 +134,17 @@ func (c *conf) setStarNotaryAPIPort() {
 		log.Panic("star notary api port environment variable not found")
 	}
 
-	c.StarNotaryAPIPort = starNotaryAPIPort
+	c.starNotaryAPIPort = starNotaryAPIPort
+}
+
+func (c *conf) StarNotaryAPIPort() string {
+	return c.starNotaryAPIPort
 }
 
 func (c *conf) setLogPath() {
-	c.LogPath = c.hocon.GetString("log.path")
+	c.logPath = c.hocon.GetString("log.path")
+}
+
+func (c *conf) LogPath() string {
+	return c.logPath
 }
