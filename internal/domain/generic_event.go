@@ -1,10 +1,12 @@
 package domain
 
 import (
+	"bytes"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/sergera/star-notary-listener/internal/logger"
+	"github.com/sergera/star-notary-listener/pkg/slc"
 )
 
 type GenericEvent struct {
@@ -44,4 +46,23 @@ func (e *GenericEvent) MarshalLogObject(enc logger.ObjectEncoder) error {
 	enc.AddString("name", e.Name)
 	enc.AddString("date", e.Date)
 	return nil
+}
+
+func (e *GenericEvent) IsDuplicate(duplicate *GenericEvent) bool {
+	if !slc.ShallowEqual(e.Topics, duplicate.Topics) ||
+		e.BlockNumber.String() != duplicate.BlockNumber.String() ||
+		e.BlockHash != duplicate.BlockHash ||
+		e.LogIndex != duplicate.LogIndex ||
+		e.TxIndex != duplicate.TxIndex ||
+		e.TxHash != duplicate.TxHash ||
+		!bytes.Equal(e.Data, duplicate.Data) ||
+		e.Sender != duplicate.Sender ||
+		e.TokenId != duplicate.TokenId ||
+		e.Name != duplicate.Name ||
+		e.Coordinates != duplicate.Coordinates ||
+		e.PriceInEther.String() != duplicate.PriceInEther.String() ||
+		e.ContractHash != duplicate.ContractHash {
+		return false
+	}
+	return true
 }

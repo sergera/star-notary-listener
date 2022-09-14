@@ -14,6 +14,7 @@ import (
 	"github.com/sergera/star-notary-listener/internal/eth"
 	"github.com/sergera/star-notary-listener/internal/gocontracts/starnotary"
 	"github.com/sergera/star-notary-listener/internal/logger"
+	"github.com/sergera/star-notary-listener/internal/queue"
 	"github.com/sergera/star-notary-listener/internal/service"
 )
 
@@ -26,6 +27,8 @@ var eventSignatureToType = map[string]string{
 }
 
 func Listen() {
+	q := queue.NewEventQueue()
+
 	conf := conf.GetConf()
 	eth := eth.GetEth()
 
@@ -51,45 +54,45 @@ func Listen() {
 		select {
 		case createdEvent := <-createdResChan:
 			genericCreated := createdToGeneric(*createdEvent)
-			insertEventByBlockNumber(genericCreated)
+			q.InsertEventByBlockNumber(genericCreated)
 			logger.Info("created event to list", logger.Object("event", &genericCreated))
 		case changedNameEvent := <-changedNameResChan:
 			genericChangedName := changedNameToGeneric(*changedNameEvent)
-			insertEventByBlockNumber(genericChangedName)
+			q.InsertEventByBlockNumber(genericChangedName)
 			logger.Info("changed name event to list", logger.Object("event", &genericChangedName))
 		case putForSaleEvent := <-putForSaleResChan:
 			genericPutForSale := putForSaleToGeneric(*putForSaleEvent)
-			insertEventByBlockNumber(genericPutForSale)
+			q.InsertEventByBlockNumber(genericPutForSale)
 			logger.Info("put for sale event to list", logger.Object("event", &genericPutForSale))
 		case removedFromSaleEvent := <-removedFromSaleResChan:
 			genericRemovedFromSale := removedFromSaleToGeneric(*removedFromSaleEvent)
-			insertEventByBlockNumber(genericRemovedFromSale)
+			q.InsertEventByBlockNumber(genericRemovedFromSale)
 			logger.Info("removed from sale event to list", logger.Object("event", &genericRemovedFromSale))
 		case soldEvent := <-soldResChan:
 			genericSold := soldToGeneric(*soldEvent)
-			insertEventByBlockNumber(genericSold)
+			q.InsertEventByBlockNumber(genericSold)
 			logger.Info("sold event to list", logger.Object("event", &genericSold))
 		default:
-			if len(unconfirmedEventsList) > 0 {
+			if q.Length() > 0 {
 				latestBlock, err := eth.Client.BlockNumber(context.Background())
 				if err != nil {
 					logger.Error("could not update current block number", logger.String("message", err.Error()))
 				}
 				latestBlockBig, _ := big.NewInt(0).SetString(strconv.FormatUint(latestBlock, 10), 10)
-				scrapAndConfirm(latestBlockBig)
-				removeLeftoverEvents(latestBlockBig)
+				scrapAndConfirm(latestBlockBig, q)
+				q.RemoveLeftoverEvents(latestBlockBig)
 				time.Sleep(time.Duration(conf.ConfirmationSleepSeconds) * time.Second)
 			}
 		}
 	}
 }
 
-func scrapAndConfirm(latestBlock *big.Int) {
+func scrapAndConfirm(latestBlock *big.Int, q *queue.EventQueue) {
 	conf := conf.GetConf()
 	eth := eth.GetEth()
 
 	query := ethereum.FilterQuery{
-		FromBlock: unconfirmedEventsList[0].BlockNumber,
+		FromBlock: q.FirstEventBlockNumber(),
 		ToBlock:   nil, /* nil will query to latest block */
 		Addresses: []common.Address{
 			common.HexToAddress(conf.ContractAddress),
@@ -109,8 +112,8 @@ func scrapAndConfirm(latestBlock *big.Int) {
 		}
 		event := scrappedToGeneric(scrappedEvent)
 		if event.Removed {
-			/* if event was removed, remove it from list */
-			removeEvents(event)
+			/* if event was removed, remove it and duplicates from list */
+			q.RemoveEventsLike(event)
 			continue
 		}
 		if big.NewInt(0).Sub(latestBlock, event.BlockNumber).Cmp(big.NewInt(int64(conf.ConfirmationBlocks))) == -1 {
@@ -118,7 +121,7 @@ func scrapAndConfirm(latestBlock *big.Int) {
 			/* if event is not yet confirmed, ignore it */
 			continue
 		}
-		if !isEventInList(event) {
+		if !q.IsEventInList(event) {
 			/* if event is not in list, ignore it */
 			/* subscribed events might arrive after being added to logs */
 			/* which would make the event be consumed again upon arrival */
@@ -132,7 +135,7 @@ func scrapAndConfirm(latestBlock *big.Int) {
 		}
 		event.Date = time.Unix(int64(block.Time()), 0).Format(time.RFC3339)
 		consume(event)
-		removeEvents(event)
+		q.RemoveEventsLike(event)
 	}
 }
 
