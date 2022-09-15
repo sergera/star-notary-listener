@@ -81,7 +81,7 @@ func (b StarNotaryAPIService) Put(route string, jsonData []byte) error {
 	return nil
 }
 
-func (b StarNotaryAPIService) CreateStar(e domain.CreatedEvent) error {
+func (b StarNotaryAPIService) CreateStar(e domain.CreateEvent) error {
 	m, err := json.Marshal(e)
 	if err != nil {
 		logger.Error(
@@ -100,7 +100,7 @@ func (b StarNotaryAPIService) CreateStar(e domain.CreatedEvent) error {
 	return nil
 }
 
-func (b StarNotaryAPIService) ChangeName(e domain.ChangedNameEvent) error {
+func (b StarNotaryAPIService) ChangeName(e domain.ChangeNameEvent) error {
 	m, err := json.Marshal(e)
 	if err != nil {
 		logger.Error(
@@ -138,7 +138,7 @@ func (b StarNotaryAPIService) PutForSale(e domain.PutForSaleEvent) error {
 	return nil
 }
 
-func (b StarNotaryAPIService) RemoveFromSale(e domain.RemovedFromSaleEvent) error {
+func (b StarNotaryAPIService) RemoveFromSale(e domain.RemoveFromSaleEvent) error {
 	m, err := json.Marshal(e)
 	if err != nil {
 		logger.Error(
@@ -157,7 +157,7 @@ func (b StarNotaryAPIService) RemoveFromSale(e domain.RemovedFromSaleEvent) erro
 	return nil
 }
 
-func (b StarNotaryAPIService) Sell(e domain.SoldEvent) error {
+func (b StarNotaryAPIService) Purchase(e domain.PurchaseEvent) error {
 	m, err := json.Marshal(e)
 	if err != nil {
 		logger.Error(
@@ -168,7 +168,7 @@ func (b StarNotaryAPIService) Sell(e domain.SoldEvent) error {
 		return err
 	}
 
-	err = b.Put("sell", m)
+	err = b.Put("purchase", m)
 	if err != nil {
 		return err
 	}

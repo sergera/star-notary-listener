@@ -68,8 +68,8 @@ func (e *GenericEvent) IsDuplicate(duplicate *GenericEvent) bool {
 	return true
 }
 
-func (g *GenericEvent) ToCreatedEvent() CreatedEvent {
-	return CreatedEvent{
+func (g *GenericEvent) ToCreateEvent() CreateEvent {
+	return CreateEvent{
 		Owner:       g.Sender,
 		Name:        g.Name,
 		TokenId:     g.TokenId,
@@ -78,8 +78,8 @@ func (g *GenericEvent) ToCreatedEvent() CreatedEvent {
 	}
 }
 
-func (g *GenericEvent) ToChangedNameEvent() ChangedNameEvent {
-	return ChangedNameEvent{
+func (g *GenericEvent) ToChangeNameEvent() ChangeNameEvent {
+	return ChangeNameEvent{
 		NewName: g.Name,
 		TokenId: g.TokenId,
 		Date:    g.Date,
@@ -94,15 +94,15 @@ func (g *GenericEvent) ToPutForSaleEvent() PutForSaleEvent {
 	}
 }
 
-func (g *GenericEvent) ToRemovedFromSaleEvent() RemovedFromSaleEvent {
-	return RemovedFromSaleEvent{
+func (g *GenericEvent) ToRemoveFromSaleEvent() RemoveFromSaleEvent {
+	return RemoveFromSaleEvent{
 		TokenId: g.TokenId,
 		Date:    g.Date,
 	}
 }
 
-func (g *GenericEvent) ToSoldEvent() SoldEvent {
-	return SoldEvent{
+func (g *GenericEvent) ToPurchaseEvent() PurchaseEvent {
+	return PurchaseEvent{
 		NewOwner: g.Sender,
 		TokenId:  g.TokenId,
 		Date:     g.Date,

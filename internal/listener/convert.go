@@ -12,7 +12,7 @@ import (
 	"github.com/sergera/star-notary-listener/internal/logger"
 )
 
-func createdToGeneric(subscribedEvent starnotary.StarnotaryCreated) domain.GenericEvent {
+func createToGeneric(subscribedEvent starnotary.StarnotaryCreate) domain.GenericEvent {
 	blockNumberBig, _ := big.NewInt(0).SetString(strconv.FormatUint(subscribedEvent.Raw.BlockNumber, 10), 10)
 	return domain.GenericEvent{
 		Sender:       common.Address.Hex(subscribedEvent.Owner),
@@ -34,7 +34,7 @@ func createdToGeneric(subscribedEvent starnotary.StarnotaryCreated) domain.Gener
 	}
 }
 
-func changedNameToGeneric(subscribedEvent starnotary.StarnotaryChangedName) domain.GenericEvent {
+func changeNameToGeneric(subscribedEvent starnotary.StarnotaryChangeName) domain.GenericEvent {
 	blockNumberBig, _ := big.NewInt(0).SetString(strconv.FormatUint(subscribedEvent.Raw.BlockNumber, 10), 10)
 	return domain.GenericEvent{
 		Sender:       common.Address.Hex(subscribedEvent.Owner),
@@ -75,7 +75,7 @@ func putForSaleToGeneric(subscribedEvent starnotary.StarnotaryPutForSale) domain
 	}
 }
 
-func removedFromSaleToGeneric(subscribedEvent starnotary.StarnotaryRemovedFromSale) domain.GenericEvent {
+func removeFromSaleToGeneric(subscribedEvent starnotary.StarnotaryRemoveFromSale) domain.GenericEvent {
 	blockNumberBig, _ := big.NewInt(0).SetString(strconv.FormatUint(subscribedEvent.Raw.BlockNumber, 10), 10)
 	return domain.GenericEvent{
 		Sender:       common.Address.Hex(subscribedEvent.Owner),
@@ -95,7 +95,7 @@ func removedFromSaleToGeneric(subscribedEvent starnotary.StarnotaryRemovedFromSa
 	}
 }
 
-func soldToGeneric(subscribedEvent starnotary.StarnotarySold) domain.GenericEvent {
+func purchaseToGeneric(subscribedEvent starnotary.StarnotaryPurchase) domain.GenericEvent {
 	blockNumberBig, _ := big.NewInt(0).SetString(strconv.FormatUint(subscribedEvent.Raw.BlockNumber, 10), 10)
 	return domain.GenericEvent{
 		Sender:       common.Address.Hex(subscribedEvent.NewOwner),
@@ -120,16 +120,16 @@ func scrappedToGeneric(logEvent types.Log) (event domain.GenericEvent) {
 	EventType := eventSignatureToType[eventSignature]
 
 	switch EventType {
-	case "Created":
-		event = scrappedCreatedToGeneric(logEvent)
-	case "ChangedName":
-		event = scrappedChangedNameToGeneric(logEvent)
+	case "Create":
+		event = scrappedCreateToGeneric(logEvent)
+	case "ChangeName":
+		event = scrappedChangeNameToGeneric(logEvent)
 	case "PutForSale":
 		event = scrappedPutForSaleToGeneric(logEvent)
-	case "RemovedFromSale":
-		event = scrappedRemovedFromSaleToGeneric(logEvent)
-	case "Sold":
-		event = scrappedSoldToGeneric(logEvent)
+	case "RemoveFromSale":
+		event = scrappedRemoveFromSaleToGeneric(logEvent)
+	case "Purchase":
+		event = scrappedPurchaseToGeneric(logEvent)
 	default:
 		logger.Error("tried to parse a scrapped non listened event", logger.String("signature", eventSignature))
 	}
@@ -137,22 +137,22 @@ func scrappedToGeneric(logEvent types.Log) (event domain.GenericEvent) {
 	return
 }
 
-func scrappedCreatedToGeneric(logEvent types.Log) domain.GenericEvent {
+func scrappedCreateToGeneric(logEvent types.Log) domain.GenericEvent {
 	eth := eth.GetEth()
-	parsedCreated, err := eth.Contract.ParseCreated(logEvent)
+	parsedCreate, err := eth.Contract.ParseCreate(logEvent)
 	if err != nil {
-		logger.Error("could not parse scrapped created event", logger.String("message", err.Error()))
+		logger.Error("could not parse scrapped create event", logger.String("message", err.Error()))
 	}
-	return createdToGeneric(*parsedCreated)
+	return createToGeneric(*parsedCreate)
 }
 
-func scrappedChangedNameToGeneric(logEvent types.Log) domain.GenericEvent {
+func scrappedChangeNameToGeneric(logEvent types.Log) domain.GenericEvent {
 	eth := eth.GetEth()
-	parsedChangedName, err := eth.Contract.ParseChangedName(logEvent)
+	parsedChangeName, err := eth.Contract.ParseChangeName(logEvent)
 	if err != nil {
 		logger.Error("could not parse scrapped changed Name event", logger.String("message", err.Error()))
 	}
-	return changedNameToGeneric(*parsedChangedName)
+	return changeNameToGeneric(*parsedChangeName)
 }
 
 func scrappedPutForSaleToGeneric(logEvent types.Log) domain.GenericEvent {
@@ -164,20 +164,20 @@ func scrappedPutForSaleToGeneric(logEvent types.Log) domain.GenericEvent {
 	return putForSaleToGeneric(*parsedPutForSale)
 }
 
-func scrappedRemovedFromSaleToGeneric(logEvent types.Log) domain.GenericEvent {
+func scrappedRemoveFromSaleToGeneric(logEvent types.Log) domain.GenericEvent {
 	eth := eth.GetEth()
-	parsedRemovedFromSale, err := eth.Contract.ParseRemovedFromSale(logEvent)
+	parsedRemoveFromSale, err := eth.Contract.ParseRemoveFromSale(logEvent)
 	if err != nil {
 		logger.Error("could not parse scrapped Removed from sale event", logger.String("message", err.Error()))
 	}
-	return removedFromSaleToGeneric(*parsedRemovedFromSale)
+	return removeFromSaleToGeneric(*parsedRemoveFromSale)
 }
 
-func scrappedSoldToGeneric(logEvent types.Log) domain.GenericEvent {
+func scrappedPurchaseToGeneric(logEvent types.Log) domain.GenericEvent {
 	eth := eth.GetEth()
-	parsedSold, err := eth.Contract.ParseSold(logEvent)
+	parsedPurchase, err := eth.Contract.ParsePurchase(logEvent)
 	if err != nil {
-		logger.Error("could not parse scrapped sold event", logger.String("message", err.Error()))
+		logger.Error("could not parse scrapped purchase event", logger.String("message", err.Error()))
 	}
-	return soldToGeneric(*parsedSold)
+	return purchaseToGeneric(*parsedPurchase)
 }
