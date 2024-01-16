@@ -2,7 +2,6 @@ package eth
 
 import (
 	"context"
-	"errors"
 	"math/big"
 	"strings"
 	"sync"
